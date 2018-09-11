@@ -1,6 +1,6 @@
 # Overview #
 
-This plugin provide PDI step to standardize phone number, url an mail address from a set of fields.
+This plugin provide PDI step to standardize phone number, url or email address from a set of fields.
 
 # System Requirements #
 
