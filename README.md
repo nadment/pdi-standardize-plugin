@@ -1,6 +1,6 @@
 # Overview #
 
-This plugin provide PDI step to clean value from a set of fields.
+This plugin provide PDI step to standardize phone number, url an mail address from a set of fields.
 
 # System Requirements #
 
@@ -20,7 +20,6 @@ Pentaho Data Integration 8.0 or above
 
 # Usage #
 
-You can chain the cleanings on the same fields by creating several lines.
 
 Support MetaData Injection (MDI) 
 
