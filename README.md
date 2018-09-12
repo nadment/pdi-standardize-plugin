@@ -5,7 +5,7 @@
 
 This plugin provide PDI step to standardize email address, phone number or url from a set of fields.
 
-![Image](https://github.com/nadment/pdi-standardize-plugin/blob/master/src/main/resources/standardizeemail.svg)
+![Image](https://github.com/nadment/pdi-standardize-plugin/blob/master/src/main/resources/standardizeemailaddress.svg)
 ![Image](https://github.com/nadment/pdi-standardize-plugin/blob/master/src/main/resources/standardizephonenumber.svg)
 ![Image](https://github.com/nadment/pdi-standardize-plugin/blob/master/src/main/resources/standardizeurl.svg)
 
