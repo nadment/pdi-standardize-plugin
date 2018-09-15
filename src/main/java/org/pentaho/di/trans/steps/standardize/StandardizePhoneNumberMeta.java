@@ -61,11 +61,8 @@ import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
  * @author Nicolas ADMENT
  *
  */
-@Step(id = "StandardizePhoneNumber", image = "standardizephonenumber.svg", i18nPackageName = "org.pentaho.di.trans.steps.standardize", name = "StandardizePhoneNumber.Name", description = "StandardizePhoneNumber.Description", categoryDescription = "i18n:org.pentaho.di.trans.step:BaseStep.Category.Experimental", // TODO:
-		// Transform
-		// step
-		// category
-		documentationUrl = "https://github.com/nadment/pdi-cleanse/wiki")
+@Step(id = "StandardizePhoneNumber", image = "standardizephonenumber.svg", i18nPackageName = "org.pentaho.di.trans.steps.standardize", name = "StandardizePhoneNumber.Name", description = "StandardizePhoneNumber.Description", categoryDescription = "i18n:org.pentaho.di.trans.step:BaseStep.Category.DataQuality",
+		documentationUrl = "https://github.com/nadment/pdi-standardize-plugin/wiki")
 @InjectionSupported(localizationPrefix = "StandardizePhoneNumberMeta.Injection.", groups = { "FIELDS" })
 public class StandardizePhoneNumberMeta extends BaseStepMeta implements StepMetaInterface {
 

@@ -50,10 +50,7 @@ import org.w3c.dom.Node;
  * @author Nicolas ADMENT
  *
  */
-@Step(id = "StandardizeEmailAddress", image = "standardizeemailaddress.svg", i18nPackageName = "org.pentaho.di.trans.steps.standardize", name = "StandardizeEmailAddress.Name", description = "StandardizeEmailAddress.Description", categoryDescription = "i18n:org.pentaho.di.trans.step:BaseStep.Category.Experimental", // TODO:
-																																																																// Transform
-																																																																// step
-																																																																// category
+@Step(id = "StandardizeEmailAddress", image = "standardizeemailaddress.svg", i18nPackageName = "org.pentaho.di.trans.steps.standardize", name = "StandardizeEmailAddress.Name", description = "StandardizeEmailAddress.Description", categoryDescription = "i18n:org.pentaho.di.trans.step:BaseStep.Category.DataQuality", 
 		documentationUrl = "https://help.pentaho.com")
 @InjectionSupported(localizationPrefix = "StandardizeEmailAddressMeta.Injection.", groups = { "FIELDS" })
 public class StandardizeEmailAddressMeta extends BaseStepMeta implements StepMetaInterface {

@@ -66,11 +66,8 @@ import org.w3c.dom.Node;
  * @author Nicolas ADMENT
  *
  */
-@Step(id = "StandardizeUrl", image = "standardizeurl.svg", i18nPackageName = "org.pentaho.di.trans.steps.standardize", name = "StandardizeUrl.Name", description = "StandardizeUrl.Description", categoryDescription = "i18n:org.pentaho.di.trans.step:BaseStep.Category.Experimental", // TODO:
-		// Transform
-		// step
-		// category
-		documentationUrl = "https://github.com/nadment/pdi-cleanse/wiki")
+@Step(id = "StandardizeUrl", image = "standardizeurl.svg", i18nPackageName = "org.pentaho.di.trans.steps.standardize", name = "StandardizeUrl.Name", description = "StandardizeUrl.Description", categoryDescription = "i18n:org.pentaho.di.trans.step:BaseStep.Category.DataQuality",
+		documentationUrl = "https://github.com/nadment/pdi-standardize-plugin/wiki")
 @InjectionSupported(localizationPrefix = "StandardizeUrlMeta.Injection.", groups = { "FIELDS" })
 public class StandardizeUrlMeta extends BaseStepMeta implements StepMetaInterface {
 
