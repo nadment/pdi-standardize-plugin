@@ -29,6 +29,8 @@ import org.pentaho.di.trans.step.StepInterface;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
 
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+
 
 /**
  * 
@@ -54,9 +56,13 @@ public class StandardizeEmailAddressStep extends BaseStep implements StepInterfa
 		StandardizeEmailAddressMeta meta = (StandardizeEmailAddressMeta) smi;
 		StandardizeEmailAddressData data = (StandardizeEmailAddressData) sdi;
 
-		first = true;
+	    if ( super.init( meta, data ) ) {
+	    	first = true;
 
-		return super.init(meta, data);
+	        return true;
+	    }
+	   
+		return false;
 	}
 
 	@Override
@@ -172,6 +178,8 @@ public class StandardizeEmailAddressStep extends BaseStep implements StepInterfa
 		StandardizeEmailAddressMeta meta = (StandardizeEmailAddressMeta) smi;
 		StandardizeEmailAddressData data = (StandardizeEmailAddressData) sdi;
 
+		data.outputRowMeta = null;
+		
 		super.dispose(meta, data);
 	}
 }

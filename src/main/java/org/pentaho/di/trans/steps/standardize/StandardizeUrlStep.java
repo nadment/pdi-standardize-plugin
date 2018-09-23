@@ -30,6 +30,8 @@ import org.pentaho.di.trans.step.StepInterface;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
 
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+
 /**
  * 
  * @author Nicolas ADMENT
@@ -51,10 +53,14 @@ public class StandardizeUrlStep extends BaseStep implements StepInterface {
 		// Casting to step-specific implementation classes is safe
 		StandardizeUrlMeta meta = (StandardizeUrlMeta) smi;
 		StandardizeUrlData data = (StandardizeUrlData) sdi;
+	   
+		if ( super.init( meta, data ) ) {
+	    	first = true;
 
-		first = true;
-
-		return super.init(meta, data);
+	        return true;
+	    }
+	   
+		return false;
 	}
 
 	@Override
@@ -198,6 +204,8 @@ public class StandardizeUrlStep extends BaseStep implements StepInterface {
 		StandardizeUrlMeta meta = (StandardizeUrlMeta) smi;
 		StandardizeUrlData data = (StandardizeUrlData) sdi;
 
+		data.outputRowMeta = null;
+		
 		super.dispose(meta, data);
 	}	
 }

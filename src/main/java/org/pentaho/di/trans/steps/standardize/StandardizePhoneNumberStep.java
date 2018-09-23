@@ -60,12 +60,16 @@ public class StandardizePhoneNumberStep extends BaseStep implements StepInterfac
 		StandardizePhoneNumberMeta meta = (StandardizePhoneNumberMeta) smi;
 		StandardizePhoneNumberData data = (StandardizePhoneNumberData) sdi;
 
-		first = true;
+	    if ( super.init( meta, data ) ) {
+	    	first = true;
 
-		this.phoneNumberService = PhoneNumberUtil.getInstance();
-		this.supportedRegions = phoneNumberService.getSupportedRegions();
+			this.phoneNumberService = PhoneNumberUtil.getInstance();
+			this.supportedRegions = phoneNumberService.getSupportedRegions();
 
-		return super.init(meta, data);
+	        return true;
+	    }
+	   
+		return false;
 	}
 
 	public int getCountryCodeForRegion(String regionCode) {
@@ -222,6 +226,8 @@ public class StandardizePhoneNumberStep extends BaseStep implements StepInterfac
 		StandardizePhoneNumberMeta meta = (StandardizePhoneNumberMeta) smi;
 		StandardizePhoneNumberData data = (StandardizePhoneNumberData) sdi;
 
+		data.outputRowMeta = null;
+		
 		super.dispose(meta, data);
 	}
 }
