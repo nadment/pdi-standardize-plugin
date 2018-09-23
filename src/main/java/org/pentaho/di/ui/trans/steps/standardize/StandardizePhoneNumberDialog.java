@@ -52,10 +52,10 @@ public class StandardizePhoneNumberDialog extends AbstractStepDialog<Standardize
 
 	private static Class<?> PKG = StandardizePhoneNumberMeta.class; // for i18n
 																	// purposes
-	private CCombo wCountry;
-	private TableView wFields;
-	private ColumnInfo[] columnInfos;
-	private List<String> inputFields;
+	private CCombo cmbCountry;
+	private TableView tblFields;
+
+
 
 	public static void main(String[] args) {
 		try {
@@ -99,7 +99,7 @@ public class StandardizePhoneNumberDialog extends AbstractStepDialog<Standardize
 		// Fields
 		List<StandardizePhoneNumber> standardizes = meta.getStandardizePhoneNumbers();
 		if (standardizes.size() > 0) {
-			Table table = wFields.getTable();
+			Table table = tblFields.getTable();
 			//table.removeAll();
 			for (int i = 0; i < standardizes.size(); i++) {
 				StandardizePhoneNumber standardize = standardizes.get(i);
@@ -114,16 +114,16 @@ public class StandardizePhoneNumberDialog extends AbstractStepDialog<Standardize
 		}
 
 		// Default country
-		for (int i = 0; i < wCountry.getItemCount(); i++) {
-			if (wCountry.getItem(i).equals(meta.getDefaultCountry())) {
-				wCountry.select(i);
+		for (int i = 0; i < cmbCountry.getItemCount(); i++) {
+			if (cmbCountry.getItem(i).equals(meta.getDefaultCountry())) {
+				cmbCountry.select(i);
 				break;
 			}
 		}
 
-		wFields.removeEmptyRows();
-		wFields.setRowNums();
-		wFields.optWidth(true);
+		tblFields.removeEmptyRows();
+		tblFields.setRowNums();
+		tblFields.optWidth(true);
 
 		wStepname.selectAll();
 		wStepname.setFocus();
@@ -136,8 +136,8 @@ public class StandardizePhoneNumberDialog extends AbstractStepDialog<Standardize
 		stepname = wStepname.getText();
 		
 		List<StandardizePhoneNumber> standardizes = new ArrayList<>();
-		for (int i = 0; i < wFields.nrNonEmpty(); i++) {
-			TableItem item = wFields.getNonEmpty(i);
+		for (int i = 0; i < tblFields.nrNonEmpty(); i++) {
+			TableItem item = tblFields.getNonEmpty(i);
 
 			StandardizePhoneNumber standardize = new StandardizePhoneNumber();
 			standardize.setInputField(item.getText(1));
@@ -157,8 +157,8 @@ public class StandardizePhoneNumberDialog extends AbstractStepDialog<Standardize
 		}
 		meta.setStandardizePhoneNumbers(standardizes);
 
-		if (wCountry.getSelectionIndex()>0) 
-			meta.setDefaultCountry(wCountry.getItem(wCountry.getSelectionIndex()));
+		if (cmbCountry.getSelectionIndex()>0) 
+			meta.setDefaultCountry(cmbCountry.getItem(cmbCountry.getSelectionIndex()));
 	}
 
 	@Override
@@ -171,19 +171,19 @@ public class StandardizePhoneNumberDialog extends AbstractStepDialog<Standardize
 
 		props.setLook(wlCountry);
 
-		wCountry = new CCombo(parent, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
-		wCountry.setItems(this.getStepMeta().getSupportedCountries());
-		wCountry.setLayoutData(new FormDataBuilder().top(wlCountry, Const.MARGIN).fullWidth().result());
-		wCountry.addModifyListener(lsMod);
-		props.setLook(wCountry);
+		cmbCountry = new CCombo(parent, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
+		cmbCountry.setItems(this.getStepMeta().getSupportedCountries());
+		cmbCountry.setLayoutData(new FormDataBuilder().top(wlCountry, Const.MARGIN).fullWidth().result());
+		cmbCountry.addModifyListener(lsMod);
+		props.setLook(cmbCountry);
 
 		// Table with fields
 		Label wlFields = new Label(parent, SWT.LEFT);
 		wlFields.setText(BaseMessages.getString(PKG, "StandardizePhoneNumberDialog.Fields.Label"));
-		wlFields.setLayoutData(new FormDataBuilder().top(wCountry, Const.MARGIN * 2).fullWidth().result());
+		wlFields.setLayoutData(new FormDataBuilder().top(cmbCountry, Const.MARGIN * 2).fullWidth().result());
 		props.setLook(wlFields);
 
-		columnInfos = new ColumnInfo[] {
+		ColumnInfo[] columns = new ColumnInfo[] {
 				new ColumnInfo(BaseMessages.getString(PKG, "StandardizePhoneNumberDialog.ColumnInfo.InputField.Label"),
 						ColumnInfo.COLUMN_TYPE_CCOMBO, new String[] { "" }, false),
 				new ColumnInfo(BaseMessages.getString(PKG, "StandardizePhoneNumberDialog.ColumnInfo.OutputField.Label"),
@@ -198,19 +198,19 @@ public class StandardizePhoneNumberDialog extends AbstractStepDialog<Standardize
 						ColumnInfo.COLUMN_TYPE_TEXT, new String[] { "" }, false)
 		};
 
-		columnInfos[1].setToolTip(BaseMessages.getString(PKG, "StandardizePhoneNumberDialog.ColumnInfo.OutputField.Tooltip"));
-		columnInfos[1].setUsingVariables(true);
-		columnInfos[3].setToolTip(BaseMessages.getString(PKG, "StandardizePhoneNumberDialog.ColumnInfo.Format.Tooltip"));	
-		columnInfos[4].setUsingVariables(true);
-		columnInfos[4].setToolTip(BaseMessages.getString(PKG, "StandardizePhoneNumberDialog.ColumnInfo.PhoneNumberTypeField.Tooltip"));	
-		columnInfos[5].setUsingVariables(true);
-		columnInfos[5].setToolTip(BaseMessages.getString(PKG, "StandardizePhoneNumberDialog.ColumnInfo.IsValidPhoneNumberField.Tooltip"));	
+		columns[1].setToolTip(BaseMessages.getString(PKG, "StandardizePhoneNumberDialog.ColumnInfo.OutputField.Tooltip"));
+		columns[1].setUsingVariables(true);
+		columns[3].setToolTip(BaseMessages.getString(PKG, "StandardizePhoneNumberDialog.ColumnInfo.Format.Tooltip"));	
+		columns[4].setUsingVariables(true);
+		columns[4].setToolTip(BaseMessages.getString(PKG, "StandardizePhoneNumberDialog.ColumnInfo.PhoneNumberTypeField.Tooltip"));	
+		columns[5].setUsingVariables(true);
+		columns[5].setToolTip(BaseMessages.getString(PKG, "StandardizePhoneNumberDialog.ColumnInfo.IsValidPhoneNumberField.Tooltip"));	
 		
 		
-		wFields = new TableView(transMeta, parent, SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI, columnInfos,
+		tblFields = new TableView(transMeta, parent, SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI, columns,
 				getStepMeta().getStandardizePhoneNumbers().size(), lsMod, props);
-		wFields.setLayoutData(new FormDataBuilder().left().fullWidth().top(wlFields, Const.MARGIN).bottom().result());
-		wFields.getTable().addListener(SWT.Resize, new ColumnsResizer(2,25,25,12,12,12,12));
+		tblFields.setLayoutData(new FormDataBuilder().left().fullWidth().top(wlFields, Const.MARGIN).bottom().result());
+		tblFields.getTable().addListener(SWT.Resize, new ColumnsResizer(2,25,25,12,12,12,12));
 		
 		//
 		// Search the fields in the background
@@ -222,25 +222,28 @@ public class StandardizePhoneNumberDialog extends AbstractStepDialog<Standardize
 			if (stepMeta != null) {
 				try {
 					RowMetaInterface row = transMeta.getPrevStepFields(stepMeta);
+					final List<String> inputFields = new ArrayList<>();
+					
+					
 					if (row != null) {
-						// Remember these fields...
-						inputFields = new ArrayList<>();
+
+						
 						for (ValueMetaInterface vm : row.getValueMetaList()) {
 							inputFields.add(vm.getName());
 						}					
 						
 						// Sort by name
 						String[] fieldNames = Const.sortStrings(inputFields.toArray(new String[0]));
-						columnInfos[0].setComboValues(fieldNames);
-						columnInfos[2].setComboValues(fieldNames);
+						columns[0].setComboValues(fieldNames);
+						columns[2].setComboValues(fieldNames);
 					}
 
 					// Display in red missing field names
 					Display.getDefault().asyncExec(new Runnable() {
 						public void run() {
-							if (!wFields.isDisposed()) {
-								for (int i = 0; i < wFields.table.getItemCount(); i++) {
-									TableItem it = wFields.table.getItem(i);
+							if (!tblFields.isDisposed()) {
+								for (int i = 0; i < tblFields.table.getItemCount(); i++) {
+									TableItem it = tblFields.table.getItem(i);
 									
 									// Input field
 									if (!Utils.isEmpty(it.getText(1))) {

@@ -54,21 +54,20 @@ public class StandardizeUrlDialog extends AbstractStepDialog<StandardizeUrlMeta>
 
 	private static Class<?> PKG = StandardizeUrlMeta.class; // for i18n purposes
 
-	private Button wUnshorten;
-	private Button wSortQueryParameters;
-	private Button wReplaceIPWithDomainName;
-	private Button wRemoveWWW;
-	private Button wRemoveFragment;
-	private Button wRemoveDuplicateSlashes;	
-	private Button wRemoveDotSegments;
-	private Button wRemoveSessionId;
-	private Button wRemoveDirectoryIndex;
-	private Button wRemoveTrailingSlash;
-	private Button wRemoveDefaultPort;
+	private Button btnUnshorten;
+	private Button btnSortQueryParameters;
+	private Button btnReplaceIPWithDomainName;
+	private Button btnRemoveWWW;
+	private Button btnRemoveFragment;
+	private Button btnRemoveDuplicateSlashes;	
+	private Button btnRemoveDotSegments;
+	private Button btnRemoveSessionId;
+	private Button btnRemoveDirectoryIndex;
+	private Button btnRemoveTrailingSlash;
+	private Button btnRemoveDefaultPort;
 	
-	private TableView wFields;
-	private ColumnInfo[] columnInfos;
-	private List<String> inputFields;
+	private TableView tblFields;
+	
 	
 	/**
 	 * Constructor that saves incoming meta object to a local variable, so it
@@ -93,22 +92,22 @@ public class StandardizeUrlDialog extends AbstractStepDialog<StandardizeUrlMeta>
 	@Override
 	protected void loadMeta(final StandardizeUrlMeta meta) {
 		
-		this.wUnshorten.setSelection(meta.isUnshorten());
-		this.wRemoveDefaultPort.setSelection(meta.isRemoveDefaultPort());
-		this.wRemoveWWW.setSelection(meta.isRemoveWWW());
-		this.wRemoveDotSegments.setSelection(meta.isRemoveDotSegments());
-		this.wRemoveTrailingSlash.setSelection(meta.isRemoveTrailingSlash());
-		this.wRemoveDirectoryIndex.setSelection(meta.isRemoveDirectoryIndex());
-		this.wRemoveFragment.setSelection(meta.isRemoveFragment());		
-		this.wRemoveSessionId.setSelection(meta.isRemoveSessionId());
-		this.wRemoveDuplicateSlashes.setSelection(meta.isRemoveDuplicateSlashes());
-		this.wReplaceIPWithDomainName.setSelection(meta.isReplaceIPWithDomainName());
-		this.wSortQueryParameters.setSelection(meta.isSortQueryParameters());
+		this.btnUnshorten.setSelection(meta.isUnshorten());
+		this.btnRemoveDefaultPort.setSelection(meta.isRemoveDefaultPort());
+		this.btnRemoveWWW.setSelection(meta.isRemoveWWW());
+		this.btnRemoveDotSegments.setSelection(meta.isRemoveDotSegments());
+		this.btnRemoveTrailingSlash.setSelection(meta.isRemoveTrailingSlash());
+		this.btnRemoveDirectoryIndex.setSelection(meta.isRemoveDirectoryIndex());
+		this.btnRemoveFragment.setSelection(meta.isRemoveFragment());		
+		this.btnRemoveSessionId.setSelection(meta.isRemoveSessionId());
+		this.btnRemoveDuplicateSlashes.setSelection(meta.isRemoveDuplicateSlashes());
+		this.btnReplaceIPWithDomainName.setSelection(meta.isReplaceIPWithDomainName());
+		this.btnSortQueryParameters.setSelection(meta.isSortQueryParameters());
 		
 		// Fields
 		List<StandardizeUrl> standardizes = meta.getStandardizeUrls();
 		if (standardizes.size() > 0) {
-			Table table = wFields.getTable();
+			Table table = tblFields.getTable();
 			//table.removeAll();
 			for (int i = 0; i < standardizes.size(); i++) {
 				StandardizeUrl standardize = standardizes.get(i);
@@ -118,9 +117,9 @@ public class StandardizeUrlDialog extends AbstractStepDialog<StandardizeUrlMeta>
 			}
 		}
 
-		wFields.removeEmptyRows();
-		wFields.setRowNums();
-		wFields.optWidth(true);
+		tblFields.removeEmptyRows();
+		tblFields.setRowNums();
+		tblFields.optWidth(true);
 
 		wStepname.selectAll();
 		wStepname.setFocus();
@@ -138,22 +137,22 @@ public class StandardizeUrlDialog extends AbstractStepDialog<StandardizeUrlMeta>
 		stepname = wStepname.getText();
 
 		// options
-		meta.setUnshorten(wUnshorten.getSelection());
-		meta.setRemoveDefaultPort(wRemoveDefaultPort.getSelection());
-		meta.setRemoveWWW(this.wRemoveWWW.getSelection());
-		meta.setRemoveDotSegments(this.wRemoveDotSegments.getSelection());	
-		meta.setRemoveTrailingSlash(this.wRemoveTrailingSlash.getSelection());
-		meta.setRemoveDirectoryIndex(this.wRemoveDirectoryIndex.getSelection());
-		meta.setRemoveFragment(this.wRemoveFragment.getSelection());
-		meta.setRemoveSessionId(this.wRemoveSessionId.getSelection());
-		meta.setRemoveDuplicateSlashes(this.wRemoveDuplicateSlashes.getSelection());
-		meta.setReplaceIPWithDomainName(this.wReplaceIPWithDomainName.getSelection());
-		meta.setSortQueryParameters(this.wSortQueryParameters.getSelection());
+		meta.setUnshorten(btnUnshorten.getSelection());
+		meta.setRemoveDefaultPort(btnRemoveDefaultPort.getSelection());
+		meta.setRemoveWWW(this.btnRemoveWWW.getSelection());
+		meta.setRemoveDotSegments(this.btnRemoveDotSegments.getSelection());	
+		meta.setRemoveTrailingSlash(this.btnRemoveTrailingSlash.getSelection());
+		meta.setRemoveDirectoryIndex(this.btnRemoveDirectoryIndex.getSelection());
+		meta.setRemoveFragment(this.btnRemoveFragment.getSelection());
+		meta.setRemoveSessionId(this.btnRemoveSessionId.getSelection());
+		meta.setRemoveDuplicateSlashes(this.btnRemoveDuplicateSlashes.getSelection());
+		meta.setReplaceIPWithDomainName(this.btnReplaceIPWithDomainName.getSelection());
+		meta.setSortQueryParameters(this.btnSortQueryParameters.getSelection());
 		
 		// fields
 		List<StandardizeUrl> standardizes = new ArrayList<>();
-		for (int i = 0; i < wFields.nrNonEmpty(); i++) {
-			TableItem item = wFields.getNonEmpty(i);
+		for (int i = 0; i < tblFields.nrNonEmpty(); i++) {
+			TableItem item = tblFields.getNonEmpty(i);
 
 			StandardizeUrl standardize = new StandardizeUrl();
 			standardize.setInputField(item.getText(1));
@@ -187,11 +186,11 @@ public class StandardizeUrlDialog extends AbstractStepDialog<StandardizeUrlMeta>
 	    props.setLook(groupPreservingSemantics);
 		
 	    
-		wRemoveDefaultPort = new Button(groupPreservingSemantics, SWT.CHECK);
-		wRemoveDefaultPort.setText(BaseMessages.getString(PKG, "StandardizeUrlDialog.RemoveDefaultPort.Label"));
-		wRemoveDefaultPort.setToolTipText(BaseMessages.getString(PKG, "StandardizeUrlDialog.RemoveDefaultPort.Tooltip"));
-		wRemoveDefaultPort.addSelectionListener(lsDef);
-		props.setLook(wRemoveDefaultPort);
+		btnRemoveDefaultPort = new Button(groupPreservingSemantics, SWT.CHECK);
+		btnRemoveDefaultPort.setText(BaseMessages.getString(PKG, "StandardizeUrlDialog.RemoveDefaultPort.Label"));
+		btnRemoveDefaultPort.setToolTipText(BaseMessages.getString(PKG, "StandardizeUrlDialog.RemoveDefaultPort.Tooltip"));
+		btnRemoveDefaultPort.addSelectionListener(lsDef);
+		props.setLook(btnRemoveDefaultPort);
 	    	    
 	    //-----------------------------------------------------------------------------
 	    // Usually preserving semantics
@@ -206,17 +205,17 @@ public class StandardizeUrlDialog extends AbstractStepDialog<StandardizeUrlMeta>
 	    groupUsuallyPreservingSemantics.setLayoutData(new FormDataBuilder().top(groupPreservingSemantics).fullWidth().result());
 	    props.setLook(groupUsuallyPreservingSemantics);
 	    
-		wRemoveDotSegments = new Button(groupUsuallyPreservingSemantics, SWT.CHECK);
-		wRemoveDotSegments.setText(BaseMessages.getString(PKG, "StandardizeUrlDialog.RemoveDotSegments.Label"));
-		wRemoveDotSegments.setToolTipText(BaseMessages.getString(PKG, "StandardizeUrlDialog.RemoveDotSegments.Tooltip"));
-		wRemoveDotSegments.addSelectionListener(lsDef);
-		props.setLook(wRemoveDotSegments);
+		btnRemoveDotSegments = new Button(groupUsuallyPreservingSemantics, SWT.CHECK);
+		btnRemoveDotSegments.setText(BaseMessages.getString(PKG, "StandardizeUrlDialog.RemoveDotSegments.Label"));
+		btnRemoveDotSegments.setToolTipText(BaseMessages.getString(PKG, "StandardizeUrlDialog.RemoveDotSegments.Tooltip"));
+		btnRemoveDotSegments.addSelectionListener(lsDef);
+		props.setLook(btnRemoveDotSegments);
 	    
-		wSortQueryParameters = new Button(groupUsuallyPreservingSemantics, SWT.CHECK);
-		wSortQueryParameters.setText(BaseMessages.getString(PKG, "StandardizeUrlDialog.SortQueryParameters.Label"));
-		wSortQueryParameters.setToolTipText(BaseMessages.getString(PKG, "StandardizeUrlDialog.SortQueryParameters.Tooltip"));
-		wSortQueryParameters.addSelectionListener(lsDef);
-		props.setLook(wSortQueryParameters);
+		btnSortQueryParameters = new Button(groupUsuallyPreservingSemantics, SWT.CHECK);
+		btnSortQueryParameters.setText(BaseMessages.getString(PKG, "StandardizeUrlDialog.SortQueryParameters.Label"));
+		btnSortQueryParameters.setToolTipText(BaseMessages.getString(PKG, "StandardizeUrlDialog.SortQueryParameters.Tooltip"));
+		btnSortQueryParameters.addSelectionListener(lsDef);
+		props.setLook(btnSortQueryParameters);
 		
 	    //-----------------------------------------------------------------------------
 	    // Not preserving semantics
@@ -231,56 +230,56 @@ public class StandardizeUrlDialog extends AbstractStepDialog<StandardizeUrlMeta>
 	    groupNotPreservingSemantics.setLayoutData(new FormDataBuilder().top(groupUsuallyPreservingSemantics).fullWidth().result());
 	    props.setLook(groupNotPreservingSemantics);
 	    	    
-		wRemoveWWW = new Button(groupNotPreservingSemantics, SWT.CHECK);
-		wRemoveWWW.setText(BaseMessages.getString(PKG, "StandardizeUrlDialog.RemoveWWW.Label"));
-		wRemoveWWW.setToolTipText(BaseMessages.getString(PKG, "StandardizeUrlDialog.RemoveWWW.Tooltip"));
-		wRemoveWWW.addSelectionListener(lsDef);
-		props.setLook(wRemoveWWW);
+		btnRemoveWWW = new Button(groupNotPreservingSemantics, SWT.CHECK);
+		btnRemoveWWW.setText(BaseMessages.getString(PKG, "StandardizeUrlDialog.RemoveWWW.Label"));
+		btnRemoveWWW.setToolTipText(BaseMessages.getString(PKG, "StandardizeUrlDialog.RemoveWWW.Tooltip"));
+		btnRemoveWWW.addSelectionListener(lsDef);
+		props.setLook(btnRemoveWWW);
 
-		wRemoveTrailingSlash = new Button(groupNotPreservingSemantics, SWT.CHECK);
-		wRemoveTrailingSlash.setText(BaseMessages.getString(PKG, "StandardizeUrlDialog.RemoveTrailingSlash.Label"));
-		wRemoveTrailingSlash.setToolTipText(BaseMessages.getString(PKG, "StandardizeUrlDialog.RemoveTrailingSlash.Tooltip"));
-		wRemoveTrailingSlash.addSelectionListener(lsDef);
-		props.setLook(wRemoveTrailingSlash);
+		btnRemoveTrailingSlash = new Button(groupNotPreservingSemantics, SWT.CHECK);
+		btnRemoveTrailingSlash.setText(BaseMessages.getString(PKG, "StandardizeUrlDialog.RemoveTrailingSlash.Label"));
+		btnRemoveTrailingSlash.setToolTipText(BaseMessages.getString(PKG, "StandardizeUrlDialog.RemoveTrailingSlash.Tooltip"));
+		btnRemoveTrailingSlash.addSelectionListener(lsDef);
+		props.setLook(btnRemoveTrailingSlash);
 		
-		wRemoveDirectoryIndex = new Button(groupNotPreservingSemantics, SWT.CHECK);
-		wRemoveDirectoryIndex.setText(BaseMessages.getString(PKG, "StandardizeUrlDialog.RemoveDirectoryIndex.Label"));
-		wRemoveDirectoryIndex.setToolTipText(BaseMessages.getString(PKG, "StandardizeUrlDialog.RemoveDirectoryIndex.Tooltip"));
-		wRemoveDirectoryIndex.addSelectionListener(lsDef);
-		props.setLook(wRemoveDirectoryIndex);
+		btnRemoveDirectoryIndex = new Button(groupNotPreservingSemantics, SWT.CHECK);
+		btnRemoveDirectoryIndex.setText(BaseMessages.getString(PKG, "StandardizeUrlDialog.RemoveDirectoryIndex.Label"));
+		btnRemoveDirectoryIndex.setToolTipText(BaseMessages.getString(PKG, "StandardizeUrlDialog.RemoveDirectoryIndex.Tooltip"));
+		btnRemoveDirectoryIndex.addSelectionListener(lsDef);
+		props.setLook(btnRemoveDirectoryIndex);
 				
-		wRemoveFragment = new Button(groupNotPreservingSemantics, SWT.CHECK);
-		wRemoveFragment.setText(BaseMessages.getString(PKG, "StandardizeUrlDialog.RemoveFragment.Label"));
-		wRemoveFragment.setToolTipText(BaseMessages.getString(PKG, "StandardizeUrlDialog.RemoveFragment.Tooltip"));
-		wRemoveFragment.addSelectionListener(lsDef);
-		props.setLook(wRemoveFragment);
+		btnRemoveFragment = new Button(groupNotPreservingSemantics, SWT.CHECK);
+		btnRemoveFragment.setText(BaseMessages.getString(PKG, "StandardizeUrlDialog.RemoveFragment.Label"));
+		btnRemoveFragment.setToolTipText(BaseMessages.getString(PKG, "StandardizeUrlDialog.RemoveFragment.Tooltip"));
+		btnRemoveFragment.addSelectionListener(lsDef);
+		props.setLook(btnRemoveFragment);
 				
-		wRemoveSessionId = new Button(groupNotPreservingSemantics, SWT.CHECK);
-		wRemoveSessionId.setText(BaseMessages.getString(PKG, "StandardizeUrlDialog.RemoveSessionId.Label"));
-		wRemoveSessionId.setToolTipText(BaseMessages.getString(PKG, "StandardizeUrlDialog.RemoveSessionId.Tooltip"));
-		wRemoveSessionId.addSelectionListener(lsDef);
-		props.setLook(wRemoveSessionId);
+		btnRemoveSessionId = new Button(groupNotPreservingSemantics, SWT.CHECK);
+		btnRemoveSessionId.setText(BaseMessages.getString(PKG, "StandardizeUrlDialog.RemoveSessionId.Label"));
+		btnRemoveSessionId.setToolTipText(BaseMessages.getString(PKG, "StandardizeUrlDialog.RemoveSessionId.Tooltip"));
+		btnRemoveSessionId.addSelectionListener(lsDef);
+		props.setLook(btnRemoveSessionId);
 		
-		wRemoveDuplicateSlashes = new Button(groupNotPreservingSemantics, SWT.CHECK);
-		wRemoveDuplicateSlashes.setText(BaseMessages.getString(PKG, "StandardizeUrlDialog.RemoveDuplicateSlashes.Label"));
-		wRemoveDuplicateSlashes.setToolTipText(BaseMessages.getString(PKG, "StandardizeUrlDialog.RemoveDuplicateSlashes.Tooltip"));
-		wRemoveDuplicateSlashes.addSelectionListener(lsDef);
-		props.setLook(wRemoveSessionId);
+		btnRemoveDuplicateSlashes = new Button(groupNotPreservingSemantics, SWT.CHECK);
+		btnRemoveDuplicateSlashes.setText(BaseMessages.getString(PKG, "StandardizeUrlDialog.RemoveDuplicateSlashes.Label"));
+		btnRemoveDuplicateSlashes.setToolTipText(BaseMessages.getString(PKG, "StandardizeUrlDialog.RemoveDuplicateSlashes.Tooltip"));
+		btnRemoveDuplicateSlashes.addSelectionListener(lsDef);
+		props.setLook(btnRemoveSessionId);
 		
-		wReplaceIPWithDomainName = new Button(groupNotPreservingSemantics, SWT.CHECK);
-		wReplaceIPWithDomainName.setText(BaseMessages.getString(PKG, "StandardizeUrlDialog.ReplaceIPWithDomainName.Label"));
-		wReplaceIPWithDomainName.setToolTipText(BaseMessages.getString(PKG, "StandardizeUrlDialog.ReplaceIPWithDomainName.Tooltip"));
-		wReplaceIPWithDomainName.addSelectionListener(lsDef);
-		props.setLook(wReplaceIPWithDomainName);
+		btnReplaceIPWithDomainName = new Button(groupNotPreservingSemantics, SWT.CHECK);
+		btnReplaceIPWithDomainName.setText(BaseMessages.getString(PKG, "StandardizeUrlDialog.ReplaceIPWithDomainName.Label"));
+		btnReplaceIPWithDomainName.setToolTipText(BaseMessages.getString(PKG, "StandardizeUrlDialog.ReplaceIPWithDomainName.Tooltip"));
+		btnReplaceIPWithDomainName.addSelectionListener(lsDef);
+		props.setLook(btnReplaceIPWithDomainName);
 
 		
 
 		
-		wUnshorten = new Button(groupNotPreservingSemantics, SWT.CHECK);
-		wUnshorten.setText(BaseMessages.getString(PKG, "StandardizeUrlDialog.UnshortenUrl.Label"));
-		wUnshorten.setToolTipText(BaseMessages.getString(PKG, "StandardizeUrlDialog.UnshortenUrl.Tooltip"));
-		wUnshorten.addSelectionListener(lsDef);
-		props.setLook(wUnshorten);
+		btnUnshorten = new Button(groupNotPreservingSemantics, SWT.CHECK);
+		btnUnshorten.setText(BaseMessages.getString(PKG, "StandardizeUrlDialog.UnshortenUrl.Label"));
+		btnUnshorten.setToolTipText(BaseMessages.getString(PKG, "StandardizeUrlDialog.UnshortenUrl.Tooltip"));
+		btnUnshorten.addSelectionListener(lsDef);
+		props.setLook(btnUnshorten);
 
 						
 		Label wlFields = new Label(parent, SWT.NONE);
@@ -289,21 +288,21 @@ public class StandardizeUrlDialog extends AbstractStepDialog<StandardizeUrlMeta>
 		props.setLook(wlFields);
 
 
-		columnInfos = new ColumnInfo[] {
+		ColumnInfo[] columns = new ColumnInfo[] {
 				new ColumnInfo(BaseMessages.getString(PKG, "StandardizeUrlDialog.ColumnInfo.InputField.Label"),
 						ColumnInfo.COLUMN_TYPE_CCOMBO, new String[] { "" }, false),
 				new ColumnInfo(BaseMessages.getString(PKG, "StandardizeUrlDialog.ColumnInfo.OutputField.Label"),
 						ColumnInfo.COLUMN_TYPE_TEXT, new String[] { "" }, false)
 		};
 
-		columnInfos[1].setToolTip(BaseMessages.getString(PKG, "StandardizeUrlDialog.ColumnInfo.OutputField.Tooltip"));
-		columnInfos[1].setUsingVariables(true);
+		columns[1].setToolTip(BaseMessages.getString(PKG, "StandardizeUrlDialog.ColumnInfo.OutputField.Tooltip"));
+		columns[1].setUsingVariables(true);
 		
 		
-		wFields = new TableView(transMeta, parent, SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI, columnInfos,
+		tblFields = new TableView(transMeta, parent, SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI, columns,
 				getStepMeta().getStandardizeUrls().size(), lsMod, props);
-		wFields.setLayoutData(new FormDataBuilder().left().fullWidth().top(wlFields, Const.MARGIN).bottom().result());
-		wFields.getTable().addListener(SWT.Resize, new ColumnsResizer(4,48,48));
+		tblFields.setLayoutData(new FormDataBuilder().left().fullWidth().top(wlFields, Const.MARGIN).bottom().result());
+		tblFields.getTable().addListener(SWT.Resize, new ColumnsResizer(4,48,48));
 		
 		//
 		// Search the fields in the background
@@ -314,24 +313,27 @@ public class StandardizeUrlDialog extends AbstractStepDialog<StandardizeUrlMeta>
 			if (stepMeta != null) {
 				try {
 					RowMetaInterface row = transMeta.getPrevStepFields(stepMeta);
+					final List<String> inputFields = new ArrayList<>();
+												
 					if (row != null) {
-						// Remember these fields...
-						inputFields = new ArrayList<>();
+
+						
 						for (ValueMetaInterface vm : row.getValueMetaList()) {
 							inputFields.add(vm.getName());
 						}					
 						
 						// Sort by name
-						String[] fieldNames = Const.sortStrings(inputFields.toArray(new String[0]));
-						columnInfos[0].setComboValues(fieldNames);						
+						String[] fieldNames = Const.sortStrings(inputFields.toArray(new String[0]));									
+				
+						columns[0].setComboValues(fieldNames);						
 					}
 
 					// Display in red missing field names
 					Display.getDefault().asyncExec(new Runnable() {
 						public void run() {
-							if (!wFields.isDisposed()) {
-								for (int i = 0; i < wFields.table.getItemCount(); i++) {
-									TableItem it = wFields.table.getItem(i);
+							if (!tblFields.isDisposed()) {
+								for (int i = 0; i < tblFields.table.getItemCount(); i++) {
+									TableItem it = tblFields.table.getItem(i);
 									if (!Utils.isEmpty(it.getText(1))) {
 										if (!inputFields.contains(it.getText(1))) {
 											it.setBackground(GUIResource.getInstance().getColorRed());

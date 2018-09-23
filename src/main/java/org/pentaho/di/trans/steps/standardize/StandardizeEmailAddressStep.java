@@ -29,9 +29,6 @@ import org.pentaho.di.trans.step.StepInterface;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
 
-import com.google.i18n.phonenumbers.PhoneNumberUtil;
-
-
 /**
  * 
  * @author Nicolas ADMENT
