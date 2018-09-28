@@ -185,14 +185,14 @@ public class StandardizeUrlMeta extends BaseStepMeta implements StepMetaInterfac
 		xml.append(XMLHandler.addTagValue(TAG_REMOVE_DIRECTORY_INDEX, this.isRemoveDirectoryIndex()));
 		xml.append(XMLHandler.addTagValue(TAG_REMOVE_TRAILING_SLASH, this.isRemoveTrailingSlash()));
 
-		xml.append("<fields>").append(Const.CR);
+		xml.append("<fields>");
 		for (StandardizeUrl standardize : this.getStandardizeUrls()) {
-			xml.append("<field>").append(Const.CR);
+			xml.append("<field>");
 			xml.append(XMLHandler.addTagValue(TAG_INPUT, standardize.getInputField()));
 			xml.append(XMLHandler.addTagValue(TAG_OUTPUT, standardize.getOutputField()));
-			xml.append("</field>").append(Const.CR);
+			xml.append("</field>");
 		}
-		xml.append("</fields>").append(Const.CR);
+		xml.append("</fields>");
 
 		return xml.toString();
 	}

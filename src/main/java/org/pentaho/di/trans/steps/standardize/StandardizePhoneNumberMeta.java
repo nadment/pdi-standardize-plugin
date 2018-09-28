@@ -154,18 +154,18 @@ public class StandardizePhoneNumberMeta extends BaseStepMeta implements StepMeta
 
 		xml.append(XMLHandler.addTagValue(TAG_DEFAULT_COUNTRY, this.defaultCountry));
 
-		xml.append("<fields>").append(Const.CR); //$NON-NLS-1$
+		xml.append("<fields>"); //$NON-NLS-1$
 		for (StandardizePhoneNumber standardize : this.getStandardizePhoneNumbers()) {
-			xml.append("<field>").append(Const.CR); //$NON-NLS-1$
+			xml.append("<field>"); //$NON-NLS-1$
 			xml.append(XMLHandler.addTagValue(TAG_INPUT, standardize.getInputField()));
 			xml.append(XMLHandler.addTagValue(TAG_OUTPUT, standardize.getOutputField()));
 			xml.append(XMLHandler.addTagValue(TAG_COUNTRY, standardize.getCountryField()));
 			xml.append(XMLHandler.addTagValue(TAG_FORMAT, standardize.getFormat().name()));
 			xml.append(XMLHandler.addTagValue(TAG_PHONE_NUMBER_TYPE, standardize.getPhoneNumberTypeField()));
 			xml.append(XMLHandler.addTagValue(TAG_IS_VALID_NUMBER, standardize.getIsValidPhoneNumberField()));
-			xml.append("</field>").append(Const.CR); //$NON-NLS-1$
+			xml.append("</field>"); //$NON-NLS-1$
 		}
-		xml.append("</fields>").append(Const.CR); //$NON-NLS-1$
+		xml.append("</fields>"); //$NON-NLS-1$
 
 		return xml.toString();
 	}

@@ -35,7 +35,7 @@ public class StandardizeEmailAddressDialog extends AbstractStepDialog<Standardiz
 
 	private static Class<?> PKG = StandardizeEmailAddressMeta.class; // for i18n purposes
 
-	private Button wUnshorten;
+
 	
 	/**
 	 * Constructor that saves incoming meta object to a local variable, so it
