@@ -19,6 +19,7 @@ package org.pentaho.di.ui.trans.steps.standardize;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.graphics.Point;
@@ -30,6 +31,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 import org.pentaho.di.core.Const;
+import org.pentaho.di.core.annotations.PluginDialog;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
@@ -44,18 +46,16 @@ import org.pentaho.di.ui.core.gui.GUIResource;
 import org.pentaho.di.ui.core.widget.ColumnInfo;
 import org.pentaho.di.ui.core.widget.ColumnsResizer;
 import org.pentaho.di.ui.core.widget.TableView;
-import org.pentaho.di.ui.dialog.AbstractStepDialog;
 
 import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
 
+@PluginDialog(id = "standardizephonenumber", image = "standardizephonenumber.svg", pluginType = PluginDialog.PluginType.STEP, documentationUrl = "https://github.com/nadment/pdi-standardize-plugin/wiki")
 public class StandardizePhoneNumberDialog extends AbstractStepDialog<StandardizePhoneNumberMeta> {
 
 	private static Class<?> PKG = StandardizePhoneNumberMeta.class; // for i18n
 																	// purposes
 	private CCombo cmbCountry;
 	private TableView tblFields;
-
-
 
 	public static void main(String[] args) {
 		try {
@@ -93,23 +93,21 @@ public class StandardizePhoneNumberDialog extends AbstractStepDialog<Standardize
 
 	@Override
 	protected void loadMeta(final StandardizePhoneNumberMeta meta) {
-		
-
 
 		// Fields
 		List<StandardizePhoneNumber> standardizes = meta.getStandardizePhoneNumbers();
 		if (standardizes.size() > 0) {
 			Table table = tblFields.getTable();
-			//table.removeAll();
+			// table.removeAll();
 			for (int i = 0; i < standardizes.size(); i++) {
 				StandardizePhoneNumber standardize = standardizes.get(i);
 				TableItem ti = new TableItem(table, SWT.NONE);
-				ti.setText(1, standardize.getInputField());
-				ti.setText(2, standardize.getOutputField());
-				ti.setText(3, standardize.getCountryField());
-				ti.setText(4, standardize.getFormat().name());				
-				ti.setText(5, standardize.getPhoneNumberTypeField());
-				ti.setText(6, standardize.getIsValidPhoneNumberField());				
+				ti.setText(1, StringUtils.stripToEmpty(standardize.getInputField()));
+				ti.setText(2, StringUtils.stripToEmpty(standardize.getOutputField()));
+				ti.setText(3, StringUtils.stripToEmpty(standardize.getCountryField()));
+				ti.setText(4, standardize.getFormat().name());
+				ti.setText(5, StringUtils.stripToEmpty(standardize.getPhoneNumberTypeField()));
+				ti.setText(6, StringUtils.stripToEmpty(standardize.getIsValidPhoneNumberField()));
 			}
 		}
 
@@ -134,22 +132,22 @@ public class StandardizePhoneNumberDialog extends AbstractStepDialog<Standardize
 
 		// save step name
 		stepname = wStepname.getText();
-		
+
 		List<StandardizePhoneNumber> standardizes = new ArrayList<>();
 		for (int i = 0; i < tblFields.nrNonEmpty(); i++) {
 			TableItem item = tblFields.getNonEmpty(i);
 
 			StandardizePhoneNumber standardize = new StandardizePhoneNumber();
-			standardize.setInputField(item.getText(1));
-			standardize.setOutputField(item.getText(2));
-			standardize.setCountryField(item.getText(3));
-			standardize.setPhoneNumberTypeField(item.getText(5));			
-			standardize.setIsValidPhoneNumberField(item.getText(6));
+			standardize.setInputField(StringUtils.stripToNull(item.getText(1)));
+			standardize.setOutputField(StringUtils.stripToNull(item.getText(2)));
+			standardize.setCountryField(StringUtils.stripToNull(item.getText(3)));
+			standardize.setPhoneNumberTypeField(item.getText(5));
+			standardize.setIsValidPhoneNumberField(StringUtils.stripToNull(item.getText(6)));
 
 			try {
 				standardize.setFormat(PhoneNumberFormat.valueOf(item.getText(4)));
 			} catch (Exception e) {
-				this.logError("Error parsing phone number format",e);
+				this.logError("Error parsing phone number format", e);
 				standardize.setFormat(PhoneNumberFormat.E164);
 			}
 
@@ -157,7 +155,7 @@ public class StandardizePhoneNumberDialog extends AbstractStepDialog<Standardize
 		}
 		meta.setStandardizePhoneNumbers(standardizes);
 
-		if (cmbCountry.getSelectionIndex()>0) 
+		if (cmbCountry.getSelectionIndex() > 0)
 			meta.setDefaultCountry(cmbCountry.getItem(cmbCountry.getSelectionIndex()));
 	}
 
@@ -178,40 +176,48 @@ public class StandardizePhoneNumberDialog extends AbstractStepDialog<Standardize
 		props.setLook(cmbCountry);
 
 		// Table with fields
-		Label wlFields = new Label(parent, SWT.LEFT);
-		wlFields.setText(BaseMessages.getString(PKG, "StandardizePhoneNumberDialog.Fields.Label"));
-		wlFields.setLayoutData(new FormDataBuilder().top(cmbCountry, Const.MARGIN * 2).fullWidth().result());
-		props.setLook(wlFields);
+		Label lblFields = new Label(parent, SWT.LEFT);
+		lblFields.setText(BaseMessages.getString(PKG, "StandardizePhoneNumberDialog.Fields.Label"));
+		lblFields.setLayoutData(new FormDataBuilder().top(cmbCountry, Const.MARGIN * 2).fullWidth().result());
+		props.setLook(lblFields);
 
 		ColumnInfo[] columns = new ColumnInfo[] {
 				new ColumnInfo(BaseMessages.getString(PKG, "StandardizePhoneNumberDialog.ColumnInfo.InputField.Label"),
 						ColumnInfo.COLUMN_TYPE_CCOMBO, new String[] { "" }, false),
 				new ColumnInfo(BaseMessages.getString(PKG, "StandardizePhoneNumberDialog.ColumnInfo.OutputField.Label"),
 						ColumnInfo.COLUMN_TYPE_TEXT, new String[] { "" }, false),
-				new ColumnInfo(BaseMessages.getString(PKG, "StandardizePhoneNumberDialog.ColumnInfo.CountryField.Label"),
+				new ColumnInfo(
+						BaseMessages.getString(PKG, "StandardizePhoneNumberDialog.ColumnInfo.CountryField.Label"),
 						ColumnInfo.COLUMN_TYPE_CCOMBO, new String[] { "" }, false),
 				new ColumnInfo(BaseMessages.getString(PKG, "StandardizePhoneNumberDialog.ColumnInfo.Format.Label"),
-						ColumnInfo.COLUMN_TYPE_CCOMBO, this.getStepMeta().getSupportedFormats(), false), 
-				new ColumnInfo(BaseMessages.getString(PKG, "StandardizePhoneNumberDialog.ColumnInfo.PhoneNumberTypeField.Label"),
+						ColumnInfo.COLUMN_TYPE_CCOMBO, this.getStepMeta().getSupportedFormats(), false),
+				new ColumnInfo(
+						BaseMessages.getString(PKG,
+								"StandardizePhoneNumberDialog.ColumnInfo.PhoneNumberTypeField.Label"),
 						ColumnInfo.COLUMN_TYPE_TEXT, new String[] { "" }, false),
-				new ColumnInfo(BaseMessages.getString(PKG, "StandardizePhoneNumberDialog.ColumnInfo.IsValidPhoneNumberField.Label"),
-						ColumnInfo.COLUMN_TYPE_TEXT, new String[] { "" }, false)
-		};
+				new ColumnInfo(
+						BaseMessages.getString(PKG,
+								"StandardizePhoneNumberDialog.ColumnInfo.IsValidPhoneNumberField.Label"),
+						ColumnInfo.COLUMN_TYPE_TEXT, new String[] { "" }, false) };
 
-		columns[1].setToolTip(BaseMessages.getString(PKG, "StandardizePhoneNumberDialog.ColumnInfo.OutputField.Tooltip"));
+		columns[0]
+				.setToolTip(BaseMessages.getString(PKG, "StandardizePhoneNumberDialog.ColumnInfo.InputField.Tooltip"));
+		columns[1]
+				.setToolTip(BaseMessages.getString(PKG, "StandardizePhoneNumberDialog.ColumnInfo.OutputField.Tooltip"));
 		columns[1].setUsingVariables(true);
-		columns[3].setToolTip(BaseMessages.getString(PKG, "StandardizePhoneNumberDialog.ColumnInfo.Format.Tooltip"));	
+		columns[3].setToolTip(BaseMessages.getString(PKG, "StandardizePhoneNumberDialog.ColumnInfo.Format.Tooltip"));
 		columns[4].setUsingVariables(true);
-		columns[4].setToolTip(BaseMessages.getString(PKG, "StandardizePhoneNumberDialog.ColumnInfo.PhoneNumberTypeField.Tooltip"));	
+		columns[4].setToolTip(
+				BaseMessages.getString(PKG, "StandardizePhoneNumberDialog.ColumnInfo.PhoneNumberTypeField.Tooltip"));
 		columns[5].setUsingVariables(true);
-		columns[5].setToolTip(BaseMessages.getString(PKG, "StandardizePhoneNumberDialog.ColumnInfo.IsValidPhoneNumberField.Tooltip"));	
-		
-		
-		tblFields = new TableView(transMeta, parent, SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI, columns,
-				getStepMeta().getStandardizePhoneNumbers().size(), lsMod, props);
-		tblFields.setLayoutData(new FormDataBuilder().left().fullWidth().top(wlFields, Const.MARGIN).bottom().result());
-		tblFields.getTable().addListener(SWT.Resize, new ColumnsResizer(2,25,25,12,12,12,12));
-		
+		columns[5].setToolTip(
+				BaseMessages.getString(PKG, "StandardizePhoneNumberDialog.ColumnInfo.IsValidPhoneNumberField.Tooltip"));
+
+		tblFields = new TableView(transMeta, parent, SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI, columns, 0, lsMod,
+				props);
+		tblFields.setLayoutData(new FormDataBuilder().left().fullWidth().top(lblFields, Const.MARGIN).bottom().result());
+		tblFields.getTable().addListener(SWT.Resize, new ColumnsResizer(2, 25, 25, 12, 12, 12, 12));
+
 		//
 		// Search the fields in the background
 		//
@@ -223,15 +229,13 @@ public class StandardizePhoneNumberDialog extends AbstractStepDialog<Standardize
 				try {
 					RowMetaInterface row = transMeta.getPrevStepFields(stepMeta);
 					final List<String> inputFields = new ArrayList<>();
-					
-					
+
 					if (row != null) {
 
-						
 						for (ValueMetaInterface vm : row.getValueMetaList()) {
 							inputFields.add(vm.getName());
-						}					
-						
+						}
+
 						// Sort by name
 						String[] fieldNames = Const.sortStrings(inputFields.toArray(new String[0]));
 						columns[0].setComboValues(fieldNames);
@@ -244,23 +248,20 @@ public class StandardizePhoneNumberDialog extends AbstractStepDialog<Standardize
 							if (!tblFields.isDisposed()) {
 								for (int i = 0; i < tblFields.table.getItemCount(); i++) {
 									TableItem it = tblFields.table.getItem(i);
-									
+
 									// Input field
 									if (!Utils.isEmpty(it.getText(1))) {
 										if (!inputFields.contains(it.getText(1))) {
 											it.setBackground(GUIResource.getInstance().getColorRed());
 										}
 									}
-									
+
 									// Country field
 									if (!Utils.isEmpty(it.getText(3))) {
 										if (!inputFields.contains(it.getText(3))) {
 											it.setBackground(GUIResource.getInstance().getColorRed());
 										}
 									}
-
-									
-									
 								}
 							}
 						}

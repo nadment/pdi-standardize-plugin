@@ -61,8 +61,7 @@ import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
  * @author Nicolas ADMENT
  *
  */
-@Step(id = "StandardizePhoneNumber", image = "standardizephonenumber.svg", i18nPackageName = "org.pentaho.di.trans.steps.standardize", name = "StandardizePhoneNumber.Name", description = "StandardizePhoneNumber.Description", categoryDescription = "i18n:org.pentaho.di.trans.step:BaseStep.Category.DataQuality",
-		documentationUrl = "https://github.com/nadment/pdi-standardize-plugin/wiki")
+@Step(id = "StandardizePhoneNumber", image = "standardizephonenumber.svg", i18nPackageName = "org.pentaho.di.trans.steps.standardize", name = "StandardizePhoneNumber.Name", description = "StandardizePhoneNumber.Description", categoryDescription = "i18n:org.pentaho.di.trans.step:BaseStep.Category.DataQuality")
 @InjectionSupported(localizationPrefix = "StandardizePhoneNumberMeta.Injection.", groups = { "FIELDS" })
 public class StandardizePhoneNumberMeta extends BaseStepMeta implements StepMetaInterface {
 
@@ -71,13 +70,13 @@ public class StandardizePhoneNumberMeta extends BaseStepMeta implements StepMeta
 	/**
 	 * Constants:
 	 */
-	private static final String TAG_INPUT = "input"; //$NON-NLS-1$
-	private static final String TAG_OUTPUT = "output"; //$NON-NLS-1$
-	private static final String TAG_COUNTRY = "country"; //$NON-NLS-1$
+	private static final String TAG_INPUT_FIELD = "input_field"; //$NON-NLS-1$
+	private static final String TAG_OUTPUT_FIELD = "output_field"; //$NON-NLS-1$
+	private static final String TAG_COUNTRY_FIELD = "country_field"; //$NON-NLS-1$
 	private static final String TAG_FORMAT = "format"; //$NON-NLS-1$
 	private static final String TAG_DEFAULT_COUNTRY = "country"; //$NON-NLS-1$
 	private static final String TAG_PHONE_NUMBER_TYPE = "phonenumbertype"; //$NON-NLS-1$
-	private static final String TAG_IS_VALID_NUMBER = "isvalidphonenumber"; //$NON-NLS-1$
+	private static final String TAG_VALID_FIELD = "valid_field"; //$NON-NLS-1$
 
 	private static final Set<PhoneNumberFormat> SUPPORTED_FORMATS = EnumSet.of(PhoneNumberFormat.E164,
 			PhoneNumberFormat.INTERNATIONAL, PhoneNumberFormat.NATIONAL, PhoneNumberFormat.RFC3966);
@@ -87,7 +86,7 @@ public class StandardizePhoneNumberMeta extends BaseStepMeta implements StepMeta
 
 	/** The phone number to standardize */
 	@InjectionDeep
-	private List<StandardizePhoneNumber> standardizePhoneNumbers = new ArrayList<>();
+	private List<StandardizePhoneNumber> standardizes = new ArrayList<>();
 
 	/**
 	 * additional options
@@ -135,8 +134,7 @@ public class StandardizePhoneNumberMeta extends BaseStepMeta implements StepMeta
 	 */
 	@Override
 	public void setDefault() {
-
-		standardizePhoneNumbers = new ArrayList<>();
+		this.standardizes = new ArrayList<>();
 		this.defaultCountry = "FR";
 	}
 
@@ -157,12 +155,12 @@ public class StandardizePhoneNumberMeta extends BaseStepMeta implements StepMeta
 		xml.append("<fields>"); //$NON-NLS-1$
 		for (StandardizePhoneNumber standardize : this.getStandardizePhoneNumbers()) {
 			xml.append("<field>"); //$NON-NLS-1$
-			xml.append(XMLHandler.addTagValue(TAG_INPUT, standardize.getInputField()));
-			xml.append(XMLHandler.addTagValue(TAG_OUTPUT, standardize.getOutputField()));
-			xml.append(XMLHandler.addTagValue(TAG_COUNTRY, standardize.getCountryField()));
+			xml.append(XMLHandler.addTagValue(TAG_INPUT_FIELD, standardize.getInputField()));
+			xml.append(XMLHandler.addTagValue(TAG_OUTPUT_FIELD, standardize.getOutputField()));
+			xml.append(XMLHandler.addTagValue(TAG_COUNTRY_FIELD, standardize.getCountryField()));
 			xml.append(XMLHandler.addTagValue(TAG_FORMAT, standardize.getFormat().name()));
 			xml.append(XMLHandler.addTagValue(TAG_PHONE_NUMBER_TYPE, standardize.getPhoneNumberTypeField()));
-			xml.append(XMLHandler.addTagValue(TAG_IS_VALID_NUMBER, standardize.getIsValidPhoneNumberField()));
+			xml.append(XMLHandler.addTagValue(TAG_VALID_FIELD, standardize.getIsValidPhoneNumberField()));
 			xml.append("</field>"); //$NON-NLS-1$
 		}
 		xml.append("</fields>"); //$NON-NLS-1$
@@ -178,18 +176,16 @@ public class StandardizePhoneNumberMeta extends BaseStepMeta implements StepMeta
 
 			Node fields = XMLHandler.getSubNode(stepNode, "fields");
 			int count = XMLHandler.countNodes(fields, "field");
-			standardizePhoneNumbers = new ArrayList<>(count);
+			standardizes = new ArrayList<>(count);
 			for (int i = 0; i < count; i++) {
 				Node field = XMLHandler.getSubNodeByNr(fields, "field", i);
 
 				StandardizePhoneNumber standardize = new StandardizePhoneNumber();
-				standardize.setInputField(Const.NVL(XMLHandler.getTagValue(field, TAG_INPUT), ""));
-				standardize.setOutputField(Const.NVL(XMLHandler.getTagValue(field, TAG_OUTPUT), ""));
-				standardize.setCountryField(Const.NVL(XMLHandler.getTagValue(field, TAG_COUNTRY), ""));
-				standardize
-						.setPhoneNumberTypeField(Const.NVL(XMLHandler.getTagValue(field, TAG_PHONE_NUMBER_TYPE), ""));
-				standardize
-						.setIsValidPhoneNumberField(Const.NVL(XMLHandler.getTagValue(field, TAG_IS_VALID_NUMBER), ""));
+				standardize.setInputField(XMLHandler.getTagValue(field, TAG_INPUT_FIELD));
+				standardize.setOutputField(XMLHandler.getTagValue(field, TAG_OUTPUT_FIELD));
+				standardize.setCountryField(XMLHandler.getTagValue(field, TAG_COUNTRY_FIELD));
+				standardize.setPhoneNumberTypeField(XMLHandler.getTagValue(field, TAG_PHONE_NUMBER_TYPE));
+				standardize.setIsValidPhoneNumberField(XMLHandler.getTagValue(field, TAG_VALID_FIELD));
 
 				try {
 					String value = XMLHandler.getTagValue(field, TAG_FORMAT);
@@ -199,7 +195,7 @@ public class StandardizePhoneNumberMeta extends BaseStepMeta implements StepMeta
 
 				}
 
-				standardizePhoneNumbers.add(standardize);
+				standardizes.add(standardize);
 			}
 		} catch (Exception e) {
 			throw new KettleXMLException(
@@ -213,20 +209,22 @@ public class StandardizePhoneNumberMeta extends BaseStepMeta implements StepMeta
 			throws KettleException {
 		try {
 
-			for (int i = 0; i < this.standardizePhoneNumbers.size(); i++) {
-				StandardizePhoneNumber standardize = standardizePhoneNumbers.get(i);
-				repository.saveStepAttribute(id_transformation, id_step, i, TAG_INPUT, standardize.getInputField());
-				repository.saveStepAttribute(id_transformation, id_step, i, TAG_OUTPUT, standardize.getOutputField());
-				repository.saveStepAttribute(id_transformation, id_step, i, TAG_COUNTRY, standardize.getCountryField());
+			for (int i = 0; i < this.standardizes.size(); i++) {
+				StandardizePhoneNumber standardize = standardizes.get(i);
+				repository.saveStepAttribute(id_transformation, id_step, i, TAG_INPUT_FIELD,
+						standardize.getInputField());
+				repository.saveStepAttribute(id_transformation, id_step, i, TAG_OUTPUT_FIELD,
+						standardize.getOutputField());
+				repository.saveStepAttribute(id_transformation, id_step, i, TAG_COUNTRY_FIELD,
+						standardize.getCountryField());
 				repository.saveStepAttribute(id_transformation, id_step, i, TAG_FORMAT, standardize.getFormat().name());
 				repository.saveStepAttribute(id_transformation, id_step, i, TAG_PHONE_NUMBER_TYPE,
 						standardize.getPhoneNumberTypeField());
-
-				repository.saveStepAttribute(id_transformation, id_step, i, TAG_IS_VALID_NUMBER,
+				repository.saveStepAttribute(id_transformation, id_step, i, TAG_VALID_FIELD,
 						standardize.getIsValidPhoneNumberField());
 			}
 
-			repository.saveStepAttribute(id_transformation, id_step, TAG_DEFAULT_COUNTRY, this.defaultCountry);
+			repository.saveStepAttribute(id_transformation, id_step, TAG_DEFAULT_COUNTRY, this.getDefaultCountry());
 		} catch (Exception e) {
 			throw new KettleException(
 					BaseMessages.getString(PKG, "StandardizeMeta.Exception.UnableToSaveRepository", id_step), e); //$NON-NLS-1$
@@ -237,25 +235,24 @@ public class StandardizePhoneNumberMeta extends BaseStepMeta implements StepMeta
 	public void readRep(Repository repository, IMetaStore metaStore, ObjectId id_step, List<DatabaseMeta> databases)
 			throws KettleException {
 		try {
-			int count = repository.countNrStepAttributes(id_step, TAG_INPUT);
-			standardizePhoneNumbers = new ArrayList<>(count);
+			int count = repository.countNrStepAttributes(id_step, TAG_INPUT_FIELD);
+			standardizes = new ArrayList<>(count);
 			for (int i = 0; i < count; i++) {
 				StandardizePhoneNumber standardize = new StandardizePhoneNumber();
-				standardize.setInputField(repository.getStepAttributeString(id_step, i, TAG_INPUT));
-				standardize.setOutputField(repository.getStepAttributeString(id_step, i, TAG_OUTPUT));
-				standardize.setCountryField(repository.getStepAttributeString(id_step, i, TAG_COUNTRY));
+				standardize.setInputField(repository.getStepAttributeString(id_step, i, TAG_INPUT_FIELD));
+				standardize.setOutputField(repository.getStepAttributeString(id_step, i, TAG_OUTPUT_FIELD));
+				standardize.setCountryField(repository.getStepAttributeString(id_step, i, TAG_COUNTRY_FIELD));
 				standardize
 						.setPhoneNumberTypeField(repository.getStepAttributeString(id_step, i, TAG_PHONE_NUMBER_TYPE));
 
-				standardize
-						.setIsValidPhoneNumberField(repository.getStepAttributeString(id_step, i, TAG_IS_VALID_NUMBER));
+				standardize.setIsValidPhoneNumberField(repository.getStepAttributeString(id_step, i, TAG_VALID_FIELD));
 
 				String formatAttribute = repository.getStepAttributeString(id_step, i, TAG_FORMAT);
 				if (formatAttribute != null) {
 					standardize.setFormat(PhoneNumberFormat.valueOf(formatAttribute));
 				}
 
-				standardizePhoneNumbers.add(standardize);
+				standardizes.add(standardize);
 			}
 
 			this.defaultCountry = repository.getStepAttributeString(id_step, TAG_DEFAULT_COUNTRY);
@@ -295,32 +292,33 @@ public class StandardizePhoneNumberMeta extends BaseStepMeta implements StepMeta
 
 				// add the output fields if specified
 				int index = inputRowMeta.indexOfValue(standardize.getInputField());
-				ValueMetaInterface vm = inputRowMeta.getValueMeta(index);
+				ValueMetaInterface valueMeta = inputRowMeta.getValueMeta(index);
 				if (!Utils.isEmpty(standardize.getOutputField())) {
 					// created output field only if name changed
 					if (!standardize.getOutputField().equals(standardize.getInputField())) {
 
-						vm = ValueMetaFactory.createValueMeta(standardize.getOutputField(),
+						valueMeta = ValueMetaFactory.createValueMeta(standardize.getOutputField(),
 								ValueMetaInterface.TYPE_STRING);
 
-						inputRowMeta.addValueMeta(vm);
+						inputRowMeta.addValueMeta(valueMeta);
 					}
 				}
-				vm.setOrigin(stepName);
+				valueMeta.setOrigin(stepName);
 
-				// phone number type
+				// add phone number type field
 				if (!Utils.isEmpty(standardize.getPhoneNumberTypeField())) {
-					vm = ValueMetaFactory.createValueMeta(standardize.getPhoneNumberTypeField(),
+					valueMeta = ValueMetaFactory.createValueMeta(standardize.getPhoneNumberTypeField(),
 							ValueMetaInterface.TYPE_STRING);
-					vm.setOrigin(stepName);
-					inputRowMeta.addValueMeta(vm);
+					valueMeta.setOrigin(stepName);
+					inputRowMeta.addValueMeta(valueMeta);
 				}
 
+				// add valid field
 				if (!Utils.isEmpty(standardize.getIsValidPhoneNumberField())) {
-					vm = ValueMetaFactory.createValueMeta(standardize.getIsValidPhoneNumberField(),
+					valueMeta = ValueMetaFactory.createValueMeta(standardize.getIsValidPhoneNumberField(),
 							ValueMetaInterface.TYPE_BOOLEAN);
-					vm.setOrigin(stepName);
-					inputRowMeta.addValueMeta(vm);
+					valueMeta.setOrigin(stepName);
+					inputRowMeta.addValueMeta(valueMeta);
 				}
 			}
 		} catch (Exception e) {
@@ -368,22 +366,15 @@ public class StandardizePhoneNumberMeta extends BaseStepMeta implements StepMeta
 		if (input.length > 0) {
 			remarks.add(new CheckResult(CheckResultInterface.TYPE_RESULT_OK,
 					BaseMessages.getString(PKG, "StandardizeMeta.CheckResult.ReceivingInfoFromOtherSteps"), stepMeta));
-		} else {
-			remarks.add(new CheckResult(CheckResultInterface.TYPE_RESULT_ERROR,
-					BaseMessages.getString(PKG, "StandardizeMeta.CheckResult.NotReceivingInfoFromOtherSteps"),
-					stepMeta));
-		}
-
-		for (StandardizePhoneNumber standardize : this.getStandardizePhoneNumbers()) {
 
 			// Check only if input fields
-			if (input.length > 0) {
+			for (StandardizePhoneNumber standardize : this.getStandardizePhoneNumbers()) {
 
 				// See if there are missing input streams
 				ValueMetaInterface vmi = prev.searchValueMeta(standardize.getInputField());
 				if (vmi == null) {
-					String message = BaseMessages.getString(PKG,
-							"StandardizePhoneNumberMeta.CheckResult.MissingInputField", standardize.getInputField());
+					String message = BaseMessages.getString(PKG, "StandardizeMeta.CheckResult.MissingInputField",
+							Const.NVL(standardize.getInputField(), standardize.getOutputField()));
 					remarks.add(new CheckResult(CheckResultInterface.TYPE_RESULT_ERROR, message, stepMeta));
 				}
 
@@ -397,6 +388,10 @@ public class StandardizePhoneNumberMeta extends BaseStepMeta implements StepMeta
 				}
 			}
 
+		} else {
+			remarks.add(new CheckResult(CheckResultInterface.TYPE_RESULT_ERROR,
+					BaseMessages.getString(PKG, "StandardizeMeta.CheckResult.NotReceivingInfoFromOtherSteps"),
+					stepMeta));
 		}
 
 	}
@@ -420,15 +415,17 @@ public class StandardizePhoneNumberMeta extends BaseStepMeta implements StepMeta
 			result.add(region);
 		}
 
-		return result.toArray(new String[result.size()]);
+		return Const.sortStrings(result.toArray(new String[0]));
+
+		// return result.toArray(new String[result.size()]);
 	}
 
 	public List<StandardizePhoneNumber> getStandardizePhoneNumbers() {
-		return this.standardizePhoneNumbers;
+		return this.standardizes;
 	}
 
 	public void setStandardizePhoneNumbers(final List<StandardizePhoneNumber> standardizes) {
-		this.standardizePhoneNumbers = standardizes;
+		this.standardizes = standardizes;
 	}
 
 	/**

@@ -60,15 +60,15 @@ public class StandardizePhoneNumberStep extends BaseStep implements StepInterfac
 		StandardizePhoneNumberMeta meta = (StandardizePhoneNumberMeta) smi;
 		StandardizePhoneNumberData data = (StandardizePhoneNumberData) sdi;
 
-	    if ( super.init( meta, data ) ) {
-	    	first = true;
+		if (super.init(meta, data)) {
+			first = true;
 
 			this.phoneNumberService = PhoneNumberUtil.getInstance();
 			this.supportedRegions = phoneNumberService.getSupportedRegions();
 
-	        return true;
-	    }
-	   
+			return true;
+		}
+
 		return false;
 	}
 
@@ -117,29 +117,32 @@ public class StandardizePhoneNumberStep extends BaseStep implements StepInterfac
 
 		// copies row into outputRowValues and pads extra null-default slots for
 		// the output values
-		Object[] outputRowValues = Arrays.copyOf(row, data.outputRowMeta.size());
+		Object[] outputRow = Arrays.copyOf(row, data.outputRowMeta.size());
 
 		for (StandardizePhoneNumber standardize : meta.getStandardizePhoneNumbers()) {
 
 			// Default region
 			String defaultRegion = meta.getDefaultCountry();
 			if (!Utils.isEmpty(standardize.getCountryField())) {
-				int index = inputRowMeta.indexOfValue(standardize.getCountryField());
-				if (index >= 0) {
-					String country = inputRowMeta.getString(row, index);
-					if (country == null || Utils.isEmpty(country)) {
-						defaultRegion = meta.getDefaultCountry();
-					} else if (supportedRegions.contains(country.toUpperCase())) {
-						defaultRegion = country.toUpperCase();
-					} else {
-						logError(BaseMessages.getString(PKG, "StandardizePhoneNumberStep.Log.RegionNotSupported",
-								country));
 
-						defaultRegion = meta.getDefaultCountry();
-					}
-				} else {
+				int index = inputRowMeta.indexOfValue(standardize.getCountryField());
+
+				// if country field not found
+				if (index < 0) {
 					logError(BaseMessages.getString(PKG, "StandardizePhoneNumberStep.Log.CountryFieldNotFound",
 							standardize.getCountryField()));
+					this.setErrors(1);
+					return false;
+				}
+
+				String country = inputRowMeta.getString(row, index);
+				if (country == null || Utils.isEmpty(country)) {
+					defaultRegion = meta.getDefaultCountry();					
+				} else if (supportedRegions.contains(country.toUpperCase())) {
+					defaultRegion = country.toUpperCase();
+				} else {
+					logError(BaseMessages.getString(PKG, "StandardizePhoneNumberStep.Log.RegionNotSupported", country));
+					defaultRegion = meta.getDefaultCountry();
 				}
 
 			}
@@ -148,10 +151,13 @@ public class StandardizePhoneNumberStep extends BaseStep implements StepInterfac
 			String value = null;
 			int index = inputRowMeta.indexOfValue(standardize.getInputField());
 
-			// if input field not found, ignore
-			if (index < 0)
-				continue;
-
+			// if input field not found
+			if (index < 0) {
+				this.logError(BaseMessages.getString(PKG, "StandardizePhoneNumberStep.Log.InputFieldNotFound",
+						standardize.getInputField()));
+				this.setErrors(1);
+				return false;
+			}
 			value = inputRowMeta.getString(row, index);
 
 			if (value != null && !Utils.isEmpty(value)) {
@@ -159,48 +165,49 @@ public class StandardizePhoneNumberStep extends BaseStep implements StepInterfac
 				try {
 					// Replace unsupported character wit blank
 					value = value.replace(',', ' ');
-					
+
 					// Parse phone number
 					phoneNumber = phoneNumberService.parse(value, defaultRegion);
 					if (!Utils.isEmpty(standardize.getOutputField())) {
 						index = data.outputRowMeta.indexOfValue(standardize.getOutputField());
 					}
-					outputRowValues[index] = phoneNumberService.format(phoneNumber, standardize.getFormat());
+					outputRow[index] = phoneNumberService.format(phoneNumber, standardize.getFormat());
 				} catch (NumberParseException e) {
-					logError(BaseMessages.getString(PKG, "StandardizePhoneNumberStep.Log.ProcessPhoneNumberError",
-							standardize.getInputField(), value));
+					if (log.isRowLevel()) {
+						logRowlevel(BaseMessages.getString(PKG, "StandardizePhoneNumberStep.Log.ProcessPhoneNumberError",
+								standardize.getInputField(), value));
+					}
 				}
 
 				if (!Utils.isEmpty(standardize.getPhoneNumberTypeField())) {
 					int i = data.outputRowMeta.indexOfValue(standardize.getPhoneNumberTypeField());
 					if (phoneNumber != null)
-						outputRowValues[i] = phoneNumberService.getNumberType(phoneNumber);
+						outputRow[i] = phoneNumberService.getNumberType(phoneNumber);
 					else
-						outputRowValues[i] = "ERROR";
+						outputRow[i] = "ERROR";
 				}
 
 				if (!Utils.isEmpty(standardize.getIsValidPhoneNumberField())) {
 					int i = data.outputRowMeta.indexOfValue(standardize.getIsValidPhoneNumberField());
 					if (phoneNumber != null)
-						outputRowValues[i] = phoneNumberService.isValidNumber(phoneNumber);
+						outputRow[i] = phoneNumberService.isValidNumber(phoneNumber);
 					else
-						outputRowValues[i] = false;
+						outputRow[i] = false;
 				}
 			} else {
 				if (!Utils.isEmpty(standardize.getIsValidPhoneNumberField())) {
 					int i = data.outputRowMeta.indexOfValue(standardize.getIsValidPhoneNumberField());
-					outputRowValues[i] = false;
+					outputRow[i] = false;
 				}
-
 			}
 		}
 
 		// put the row to the output row stream
-		putRow(data.outputRowMeta, outputRowValues);
+		putRow(data.outputRowMeta, outputRow);
 
 		if (log.isRowLevel()) {
 			logRowlevel(
-					BaseMessages.getString(PKG, "StandardizePhoneNumberStep.Log.WroteRowToNextStep", outputRowValues));
+					BaseMessages.getString(PKG, "StandardizePhoneNumberStep.Log.WroteRowToNextStep", outputRow));
 		}
 
 		// log progress if it is time to to so
@@ -227,7 +234,7 @@ public class StandardizePhoneNumberStep extends BaseStep implements StepInterfac
 		StandardizePhoneNumberData data = (StandardizePhoneNumberData) sdi;
 
 		data.outputRowMeta = null;
-		
+
 		super.dispose(meta, data);
 	}
 }

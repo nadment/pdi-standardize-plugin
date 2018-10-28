@@ -16,6 +16,7 @@
 
 package org.pentaho.di.trans.steps.standardize;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.pentaho.di.core.CheckResult;
@@ -29,7 +30,11 @@ import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.di.core.injection.InjectionDeep;
 import org.pentaho.di.core.injection.InjectionSupported;
 import org.pentaho.di.core.row.RowMetaInterface;
+import org.pentaho.di.core.row.ValueMetaInterface;
+import org.pentaho.di.core.row.value.ValueMetaFactory;
+import org.pentaho.di.core.util.Utils;
 import org.pentaho.di.core.variables.VariableSpace;
+import org.pentaho.di.core.xml.XMLHandler;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.Repository;
@@ -50,12 +55,12 @@ import org.w3c.dom.Node;
  * @author Nicolas ADMENT
  *
  */
-@Step(id = "StandardizeEmailAddress", image = "standardizeemailaddress.svg", i18nPackageName = "org.pentaho.di.trans.steps.standardize", name = "StandardizeEmailAddress.Name", description = "StandardizeEmailAddress.Description", categoryDescription = "i18n:org.pentaho.di.trans.step:BaseStep.Category.DataQuality", 
-		documentationUrl = "https://help.pentaho.com")
+@Step(id = "StandardizeEmailAddress", image = "standardizeemailaddress.svg", i18nPackageName = "org.pentaho.di.trans.steps.standardize", name = "StandardizeEmailAddress.Name", description = "StandardizeEmailAddress.Description", categoryDescription = "i18n:org.pentaho.di.trans.step:BaseStep.Category.DataQuality", documentationUrl = "https://help.pentaho.com")
 @InjectionSupported(localizationPrefix = "StandardizeEmailAddressMeta.Injection.", groups = { "FIELDS" })
 public class StandardizeEmailAddressMeta extends BaseStepMeta implements StepMetaInterface {
 
-	private static Class<?> PKG = StandardizeEmailAddressMeta.class; // for i18n purposes
+	private static Class<?> PKG = StandardizeEmailAddressMeta.class; // for i18n
+																		// purposes
 
 	/**
 	 * Constants:
@@ -63,15 +68,14 @@ public class StandardizeEmailAddressMeta extends BaseStepMeta implements StepMet
 
 	private static final String TAG_INPUT_FIELD = "input_field"; //$NON-NLS-1$
 
-	private static final String TAG_NAME = "name"; //$NON-NLS-1$
-	
+	private static final String TAG_OUTPUT_FIELD = "output_field"; //$NON-NLS-1$
+
+	private static final String TAG_VALID_FIELD = "valid_field"; //$NON-NLS-1$
 
 	/** The email to standardize */
 	@InjectionDeep
-	private StandardizeEmailAddress[] standardizeEmailAddresses;
+	private List<StandardizeEmailAddress> standardizes = new ArrayList<>();
 
-	
-	
 	public StandardizeEmailAddressMeta() {
 		super();
 	}
@@ -114,16 +118,13 @@ public class StandardizeEmailAddressMeta extends BaseStepMeta implements StepMet
 	 */
 	@Override
 	public void setDefault() {
-		
-		 standardizeEmailAddresses = new StandardizeEmailAddress[0];
+
+		this.standardizes = new ArrayList<>();
 	}
 
-	
 	@Override
 	public Object clone() {
 		StandardizeEmailAddressMeta clone = (StandardizeEmailAddressMeta) super.clone();
-
-	
 
 		return clone;
 	}
@@ -133,8 +134,15 @@ public class StandardizeEmailAddressMeta extends BaseStepMeta implements StepMet
 
 		StringBuilder xml = new StringBuilder(500);
 
-
-
+		xml.append("<fields>");
+		for (StandardizeEmailAddress standardize : this.getStandardizeEmailAddresses()) {
+			xml.append("<field>");
+			xml.append(XMLHandler.addTagValue(TAG_INPUT_FIELD, standardize.getInputField()));
+			xml.append(XMLHandler.addTagValue(TAG_OUTPUT_FIELD, standardize.getOutputField()));
+			xml.append(XMLHandler.addTagValue(TAG_VALID_FIELD, standardize.getValidField()));
+			xml.append("</field>");
+		}
+		xml.append("</fields>");
 
 		return xml.toString();
 	}
@@ -143,22 +151,37 @@ public class StandardizeEmailAddressMeta extends BaseStepMeta implements StepMet
 	public void loadXML(Node stepNode, List<DatabaseMeta> databases, IMetaStore metaStore) throws KettleXMLException {
 
 		try {
-			
-			
-			
+			Node fields = XMLHandler.getSubNode(stepNode, "fields");
+			int count = XMLHandler.countNodes(fields, "field");
+			this.standardizes = new ArrayList<>(count);
+			for (int i = 0; i < count; i++) {
+				Node field = XMLHandler.getSubNodeByNr(fields, "field", i);
+
+				StandardizeEmailAddress standardize = new StandardizeEmailAddress();
+				standardize.setInputField(XMLHandler.getTagValue(field, TAG_INPUT_FIELD));
+				standardize.setOutputField(XMLHandler.getTagValue(field, TAG_OUTPUT_FIELD));
+				standardize.setValidField(XMLHandler.getTagValue(field, TAG_VALID_FIELD));
+				standardizes.add(standardize);
+			}
 		} catch (Exception e) {
 			throw new KettleXMLException(
 					BaseMessages.getString(PKG, "StandardizeMeta.Exception.UnableToReadStepInfoFromXML"), e);
 		}
-
 	}
 
 	@Override
 	public void saveRep(Repository repository, IMetaStore metaStore, ObjectId id_transformation, ObjectId id_step)
 			throws KettleException {
 		try {
-	
-			
+			for (int i = 0; i < this.standardizes.size(); i++) {
+				StandardizeEmailAddress standardize = standardizes.get(i);
+				repository.saveStepAttribute(id_transformation, id_step, i, TAG_INPUT_FIELD,
+						standardize.getInputField());
+				repository.saveStepAttribute(id_transformation, id_step, i, TAG_OUTPUT_FIELD,
+						standardize.getOutputField());
+				repository.saveStepAttribute(id_transformation, id_step, i, TAG_VALID_FIELD,
+						standardize.getValidField());
+			}
 		} catch (Exception e) {
 			throw new KettleException(
 					BaseMessages.getString(PKG, "StandardizeMeta.Exception.UnableToSaveRepository", id_step), e);
@@ -169,7 +192,16 @@ public class StandardizeEmailAddressMeta extends BaseStepMeta implements StepMet
 	public void readRep(Repository repository, IMetaStore metaStore, ObjectId id_step, List<DatabaseMeta> databases)
 			throws KettleException {
 		try {
-				
+
+			int count = repository.countNrStepAttributes(id_step, TAG_INPUT_FIELD);
+			this.standardizes = new ArrayList<>(count);
+			for (int i = 0; i < count; i++) {
+				StandardizeEmailAddress standardize = new StandardizeEmailAddress();
+				standardize.setInputField(repository.getStepAttributeString(id_step, i, TAG_INPUT_FIELD));
+				standardize.setOutputField(repository.getStepAttributeString(id_step, i, TAG_OUTPUT_FIELD));
+				standardize.setValidField(repository.getStepAttributeString(id_step, i, TAG_VALID_FIELD));
+				standardizes.add(standardize);
+			}
 		} catch (Exception e) {
 
 			throw new KettleException(
@@ -200,29 +232,26 @@ public class StandardizeEmailAddressMeta extends BaseStepMeta implements StepMet
 	public void getFields(RowMetaInterface inputRowMeta, String stepName, RowMetaInterface[] info, StepMeta nextStep,
 			VariableSpace space, Repository repository, IMetaStore metaStore) throws KettleStepException {
 		try {
-			// store the input stream meta
-			RowMetaInterface unalteredInputRowMeta = inputRowMeta.clone();
-
-			
-
 			// add the output fields if specified
-//			for (StandardizePhoneNumber standardize : this.getStandardizePhoneNumbers()) {
-//				if (!Utils.isEmpty(standardize.getName())) {
-//
-//					// extracts the ValueMeta type of an input field
-//					int type = ValueMetaInterface.TYPE_NONE;
-//					int index = unalteredInputRowMeta.indexOfValue(standardize.getInputField());
-//					if (index > 0) {
-//						type = unalteredInputRowMeta.getValueMeta(index).getType();
-//					}
-//
-//					// create ValueMeta
-//					ValueMetaInterface vm = ValueMetaFactory.createValueMeta(standardize.getName(), type);
-//					vm.setOrigin(stepName);
-//					inputRowMeta.addValueMeta(vm);
-//				}
-//			}			
-			
+			for (StandardizeEmailAddress standardize : this.getStandardizeEmailAddresses()) {
+				if (!Utils.isEmpty(standardize.getOutputField())) {
+					// create ValueMeta
+					ValueMetaInterface vm = ValueMetaFactory.createValueMeta(standardize.getOutputField(),
+							ValueMetaInterface.TYPE_STRING);
+					vm.setOrigin(stepName);
+					inputRowMeta.addValueMeta(vm);
+					
+					// add valid field
+					if (!Utils.isEmpty(standardize.getValidField())) {
+						vm = ValueMetaFactory.createValueMeta(standardize.getValidField(),
+								ValueMetaInterface.TYPE_BOOLEAN);
+						vm.setOrigin(stepName);
+						inputRowMeta.addValueMeta(vm);
+					}
+
+				}
+			}
+
 		} catch (Exception e) {
 			throw new KettleStepException(e);
 		}
@@ -268,29 +297,30 @@ public class StandardizeEmailAddressMeta extends BaseStepMeta implements StepMet
 		if (input.length > 0) {
 			remarks.add(new CheckResult(CheckResultInterface.TYPE_RESULT_OK,
 					BaseMessages.getString(PKG, "StandardizeMeta.CheckResult.ReceivingInfoFromOtherSteps"), stepMeta));
+
+			// Check only if input fields
+			for (StandardizeEmailAddress standardize : this.getStandardizeEmailAddresses()) {
+
+				// See if there are missing input streams
+				ValueMetaInterface vmi = prev.searchValueMeta(standardize.getInputField());
+				if (vmi == null) {
+					String message = BaseMessages.getString(PKG, "StandardizeMeta.CheckResult.MissingInputField",
+							standardize.getInputField());
+					remarks.add(new CheckResult(CheckResultInterface.TYPE_RESULT_ERROR, message, stepMeta));
+				}
+			}
 		} else {
 			remarks.add(new CheckResult(CheckResultInterface.TYPE_RESULT_ERROR,
-					BaseMessages.getString(PKG, "StandardizeMeta.CheckResult.NotReceivingInfoFromOtherSteps"), stepMeta));
+					BaseMessages.getString(PKG, "StandardizeMeta.CheckResult.NotReceivingInfoFromOtherSteps"),
+					stepMeta));
 		}
-
-	
-		
-
-	
-
-
 	}
 
-	public StandardizeEmailAddress[] getStandardizeEmailAddresses() {
-		return this.standardizeEmailAddresses;
+	public List<StandardizeEmailAddress> getStandardizeEmailAddresses() {
+		return this.standardizes;
 	}
 
-	public void setStandardizeEmailAddresses(final StandardizeEmailAddress[] standardizes) {
-		this.standardizeEmailAddresses = standardizes;
+	public void setStandardizeEmailAddresses(final List<StandardizeEmailAddress> standardizes) {
+		this.standardizes = standardizes;
 	}
-
-
-
-
-
 }

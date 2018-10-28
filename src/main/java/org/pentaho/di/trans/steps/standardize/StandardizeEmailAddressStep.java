@@ -18,8 +18,13 @@ package org.pentaho.di.trans.steps.standardize;
 
 import java.util.Arrays;
 
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.row.RowMetaInterface;
+import org.pentaho.di.core.row.ValueMetaInterface;
+import org.pentaho.di.core.util.Utils;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransMeta;
@@ -40,10 +45,8 @@ public class StandardizeEmailAddressStep extends BaseStep implements StepInterfa
 
 	private static Class<?> PKG = StandardizeEmailAddressMeta.class;
 
-
-	
-	public StandardizeEmailAddressStep(StepMeta stepMeta, StepDataInterface stepDataInterface, int copyNr, TransMeta transMeta,
-			Trans trans) {
+	public StandardizeEmailAddressStep(StepMeta stepMeta, StepDataInterface stepDataInterface, int copyNr,
+			TransMeta transMeta, Trans trans) {
 		super(stepMeta, stepDataInterface, copyNr, transMeta, trans);
 	}
 
@@ -53,12 +56,12 @@ public class StandardizeEmailAddressStep extends BaseStep implements StepInterfa
 		StandardizeEmailAddressMeta meta = (StandardizeEmailAddressMeta) smi;
 		StandardizeEmailAddressData data = (StandardizeEmailAddressData) sdi;
 
-	    if ( super.init( meta, data ) ) {
-	    	first = true;
+		if (super.init(meta, data)) {
+			first = true;
 
-	        return true;
-	    }
-	   
+			return true;
+		}
+
 		return false;
 	}
 
@@ -101,53 +104,60 @@ public class StandardizeEmailAddressStep extends BaseStep implements StepInterfa
 
 		RowMetaInterface inputRowMeta = getInputRowMeta();
 
-
 		// copies row into outputRowValues and pads extra null-default slots for
 		// the output values
-		Object[] outputRowValues = Arrays.copyOf(row, data.outputRowMeta.size());
-
-		//RowMetaInterface inputRowMeta = getInputRowMeta();
+		Object[] outputRow = Arrays.copyOf(row, data.outputRowMeta.size());
 
 		// apply rules by order
-//		for (StandardizePhoneNumber standardize : meta.getStandardizePhoneNumbers()) {
-//			int index = data.outputRowMeta.indexOfValue(standardize.getInputField());
-//			ValueMetaInterface vm = data.outputRowMeta.getValueMeta(index);
-//			try {
-//				// Get value from output in case we apply multi rule on same
-//				// field
-//				Object value = outputRowValues[index];
-//				Object result = value;
-//				if (value != null) {
-//					PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
-//					
-//					try {
-//					  PhoneNumber phoneNumber = phoneUtil.parse(value.toString(), meta.getCountryCode());
-//					  result = phoneUtil.format(phoneNumber, com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat.E164);
-//
-//					} catch (NumberParseException e) {
-//					  System.err.println("NumberParseException was thrown: " + e.toString());
-//					}					
+		for (StandardizeEmailAddress standardize : meta.getStandardizeEmailAddresses()) {
+			int index = data.outputRowMeta.indexOfValue(standardize.getInputField());
+			
+			// if input field not found
+			if ( index<0 ) { 
+				this.logError(BaseMessages.getString(PKG, "StandardizeEmailAddressStep.Log.InputFieldNotFound",standardize.getInputField()));
+				this.setErrors(1);
+				return false;
+			}
+			
+			ValueMetaInterface valueMeta = data.outputRowMeta.getValueMeta(index);
+			try {
+				String value = inputRowMeta.getString(row, index);
+				String result = value;
+
+				if (value != null) {
+					// The InternetAddress class in the Java Mail 1.3 API has a
+					// constructor that does strict parsing. But the 1.1 version
+					// doesn't. However, we can use the parse() method to do the
+					// checking; it does do strict RFC822 syntax checks.
+
+					InternetAddress[] addresses = InternetAddress.parse(value);
+					if (addresses.length != 1) {
+						throw new AddressException("\"" + value + "\" is an improperly formed " + "email address");
+					}
+
+					result = addresses[0].getAddress().toLowerCase();
+				}
+
+				if (!Utils.isEmpty(standardize.getOutputField())) {
+					index = data.outputRowMeta.indexOfValue(standardize.getOutputField());
+				}
+				outputRow[index] = result;
+				
+//				if (!Utils.isEmpty(standardize.getValidField())) {
+//					int i = data.outputRowMeta.indexOfValue(standardize.getValidField());
+//					outputRow[i] = false;
 //				}
-//
-//				outputRowValues[index] = vm.convertData(inputRowMeta.getValueMeta(index), result);
-//			} catch (KettleValueException e) {
-//				logError(BaseMessages.getString(PKG, "StandardizePhoneNumberStep.Log.DataIncompatibleError", String.valueOf(row[index]),
-//						inputRowMeta.getValueMeta(index).toString(), vm.toString()));
-//				throw e;
-//			}
-//		}
-		
-		
-		
-		
-		
-		
+			} catch (Exception e) {
+				logError(BaseMessages.getString(PKG, "StandardizeEmailAddressStep.Log.DataIncompatibleError",
+						String.valueOf(row[index]), inputRowMeta.getValueMeta(index).toString(), valueMeta.toString()));
+			}
+		}
 
 		// put the row to the output row stream
-		putRow(data.outputRowMeta, outputRowValues);
+		putRow(data.outputRowMeta, outputRow);
 
 		if (log.isRowLevel()) {
-			logRowlevel(BaseMessages.getString(PKG, "StandardizePhoneNumberStep.Log.WroteRowToNextStep", outputRowValues));
+			logRowlevel(BaseMessages.getString(PKG, "StandardizeEmailAddressStep.Log.WroteRowToNextStep", outputRow));
 		}
 
 		// log progress if it is time to to so
@@ -159,8 +169,6 @@ public class StandardizeEmailAddressStep extends BaseStep implements StepInterfa
 		return true;
 	}
 
-
-	
 	/**
 	 * This method is called by PDI once the step is done processing.
 	 *
@@ -176,7 +184,7 @@ public class StandardizeEmailAddressStep extends BaseStep implements StepInterfa
 		StandardizeEmailAddressData data = (StandardizeEmailAddressData) sdi;
 
 		data.outputRowMeta = null;
-		
+
 		super.dispose(meta, data);
 	}
 }

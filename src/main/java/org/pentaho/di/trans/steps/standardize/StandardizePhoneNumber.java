@@ -1,5 +1,22 @@
+/*******************************************************************************
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ ******************************************************************************/
+
 package org.pentaho.di.trans.steps.standardize;
 
+import org.apache.commons.lang.StringUtils;
 import org.pentaho.di.core.injection.Injection;
 
 import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
@@ -13,21 +30,21 @@ public class StandardizePhoneNumber implements Cloneable {
 
 	/** The input field name */
 	@Injection(name = "INPUT_FIELD", group = "FIELDS")
-	private String inputField;
+	private String inputField = null;
 
 	/** The target field name */
 	@Injection(name = "OUTPUT_FIELD", group = "FIELDS")
-	private String outputField;
+	private String outputField = null;
 
 	/** The country field name */
-	@Injection(name = "COUNTRY", group = "FIELDS")
-	private String countryField;
+	@Injection(name = "COUNTRY_FIELD", group = "FIELDS")
+	private String countryField = null;
 
-	@Injection(name = "PHONE_NUMBER_TYPE_FIELD", group = "FIELDS")
-	private String phoneNumberTypeField;
+	@Injection(name = "TYPE_FIELD", group = "FIELDS")
+	private String typeField;
 
-	@Injection(name = "IS_VALID_PHONE_NUMBER_FIELD", group = "FIELDS")
-	private String isValidNumberField;
+	@Injection(name = "IS_VALID_FIELD", group = "FIELDS")
+	private String isValidNumberField= null;
 
 	/** The format */
 	@Injection(name = "FORMAT", group = "FIELDS")
@@ -53,24 +70,24 @@ public class StandardizePhoneNumber implements Cloneable {
 		return inputField;
 	}
 
-	public void setInputField(final String field) {
-		this.inputField = field;
+	public void setInputField(final String field) {		
+		this.inputField = StringUtils.stripToNull(field);
 	}
 
 	public String getOutputField() {
 		return outputField;
 	}
 
-	public void setOutputField(final String field) {
-		this.outputField = field;
+	public void setOutputField(final String field) {	
+		this.outputField = StringUtils.stripToNull(field);
 	}
 
 	public String getCountryField() {
 		return countryField;
 	}
 
-	public void setCountryField(String field) {
-		this.countryField = field;
+	public void setCountryField(final String field) {
+		this.countryField = StringUtils.stripToNull(field);
 	}
 
 	public PhoneNumberFormat getFormat() {
@@ -84,24 +101,21 @@ public class StandardizePhoneNumber implements Cloneable {
 			this.format = param;
 	}
 
-	@Override
-	public String toString() {
-		return inputField;
-	}
+
 
 	public String getPhoneNumberTypeField() {
-		return phoneNumberTypeField;
+		return typeField;
 	}
 
-	public void setPhoneNumberTypeField(String phoneNumberTypeField) {
-		this.phoneNumberTypeField = phoneNumberTypeField;
+	public void setPhoneNumberTypeField(final String phoneNumberTypeField) {
+		this.typeField = StringUtils.stripToNull(phoneNumberTypeField);
 	}
 
 	public String getIsValidPhoneNumberField() {
 		return isValidNumberField;
 	}
 
-	public void setIsValidPhoneNumberField(String isValidPhoneNumberField) {
-		this.isValidNumberField = isValidPhoneNumberField;
+	public void setIsValidPhoneNumberField(final String field) {		
+		this.isValidNumberField = StringUtils.stripToNull(field);
 	}
 }

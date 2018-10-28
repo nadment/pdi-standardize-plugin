@@ -30,8 +30,6 @@ import org.pentaho.di.trans.step.StepInterface;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
 
-import com.google.i18n.phonenumbers.PhoneNumberUtil;
-
 /**
  * 
  * @author Nicolas ADMENT
@@ -53,13 +51,13 @@ public class StandardizeUrlStep extends BaseStep implements StepInterface {
 		// Casting to step-specific implementation classes is safe
 		StandardizeUrlMeta meta = (StandardizeUrlMeta) smi;
 		StandardizeUrlData data = (StandardizeUrlData) sdi;
-	   
-		if ( super.init( meta, data ) ) {
-	    	first = true;
 
-	        return true;
-	    }
-	   
+		if (super.init(meta, data)) {
+			first = true;
+
+			return true;
+		}
+
 		return false;
 	}
 
@@ -112,65 +110,71 @@ public class StandardizeUrlStep extends BaseStep implements StepInterface {
 			String value = null;
 			try {
 				int index = inputRowMeta.indexOfValue(standardize.getInputField());
-				
-				// if input field not found, ignore
-				if ( index<0 ) continue;	
-								
+
+				// if input field not found
+				if (index < 0) {
+					this.logError(BaseMessages.getString(PKG, "StandardizeUrlStep.Log.InputFieldNotFound",
+							standardize.getInputField()));
+					this.setErrors(1);
+					return false;
+				}
+
 				value = inputRowMeta.getString(row, index);
 				if (!Utils.isEmpty(value)) {
-				
 
-						Url url = new Url(value.toString());
-						
-						if (meta.isUnshorten()) {
-							url.unshorten();
-						}
-						
-						if (meta.isReplaceIPWithDomainName()) {
-							url.replaceIPWithDomainName();
-						}
+					Url url = new Url(value.toString());
 
-						if (meta.isRemoveDefaultPort()) {
-							url.removeDefaultPort();
-						}
+					if (meta.isUnshorten()) {
+						url.unshorten();
+					}
 
-						if (meta.isRemoveWWW()) {
-							url.removeWWW();
-						}
+					if (meta.isReplaceIPWithDomainName()) {
+						url.replaceIPWithDomainName();
+					}
 
-						if (meta.isRemoveDuplicateSlashes()) {
-							url.removeDuplicateSlashes();
-						}
-						
-						if (meta.isRemoveTrailingSlash()) {
-							url.removeTrailingSlash();
-						}
+					if (meta.isRemoveDefaultPort()) {
+						url.removeDefaultPort();
+					}
 
-						if (meta.isRemoveDotSegments()) {
-							url.removeDotSegments();
-						}
+					if (meta.isRemoveWWW()) {
+						url.removeWWW();
+					}
 
-						if (meta.isRemoveDirectoryIndex()) {
-							url.removeDirectoryIndex();
-						}
+					if (meta.isRemoveDuplicateSlashes()) {
+						url.removeDuplicateSlashes();
+					}
 
-						if (meta.isRemoveFragment()) {
-							url.removeFragment();
-						}
+					if (meta.isRemoveTrailingSlash()) {
+						url.removeTrailingSlash();
+					}
 
-						if (meta.isSortQueryParameters()) {
-							url.sortQueryParameters();
-						}
+					if (meta.isRemoveDotSegments()) {
+						url.removeDotSegments();
+					}
 
-						if (!Utils.isEmpty(standardize.getOutputField())) {
-							index = data.outputRowMeta.indexOfValue(standardize.getOutputField());
-						}
+					if (meta.isRemoveDirectoryIndex()) {
+						url.removeDirectoryIndex();
+					}
 
-						outputRowValues[index] = url.toString();						
+					if (meta.isRemoveFragment()) {
+						url.removeFragment();
+					}
+
+					if (meta.isSortQueryParameters()) {
+						url.sortQueryParameters();
+					}
+
+					if (!Utils.isEmpty(standardize.getOutputField())) {
+						index = data.outputRowMeta.indexOfValue(standardize.getOutputField());
+					}
+
+					outputRowValues[index] = url.toString();
 				}
 			} catch (Exception e) {
 				logError(BaseMessages.getString(PKG, "StandardizeUrlStep.Log.UrlNormalizationError",
 						standardize.getInputField(), value, e));
+
+				return false;
 			}
 		}
 
@@ -205,7 +209,7 @@ public class StandardizeUrlStep extends BaseStep implements StepInterface {
 		StandardizeUrlData data = (StandardizeUrlData) sdi;
 
 		data.outputRowMeta = null;
-		
+
 		super.dispose(meta, data);
-	}	
+	}
 }

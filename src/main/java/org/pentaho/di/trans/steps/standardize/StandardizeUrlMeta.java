@@ -21,7 +21,6 @@ import java.util.List;
 
 import org.pentaho.di.core.CheckResult;
 import org.pentaho.di.core.CheckResultInterface;
-import org.pentaho.di.core.Const;
 import org.pentaho.di.core.annotations.Step;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleException;
@@ -66,8 +65,7 @@ import org.w3c.dom.Node;
  * @author Nicolas ADMENT
  *
  */
-@Step(id = "StandardizeUrl", image = "standardizeurl.svg", i18nPackageName = "org.pentaho.di.trans.steps.standardize", name = "StandardizeUrl.Name", description = "StandardizeUrl.Description", categoryDescription = "i18n:org.pentaho.di.trans.step:BaseStep.Category.DataQuality",
-		documentationUrl = "https://github.com/nadment/pdi-standardize-plugin/wiki")
+@Step(id = "StandardizeUrl", image = "standardizeurl.svg", i18nPackageName = "org.pentaho.di.trans.steps.standardize", name = "StandardizeUrl.Name", description = "StandardizeUrl.Description", categoryDescription = "i18n:org.pentaho.di.trans.step:BaseStep.Category.DataQuality", documentationUrl = "https://github.com/nadment/pdi-standardize-plugin/wiki")
 @InjectionSupported(localizationPrefix = "StandardizeUrlMeta.Injection.", groups = { "FIELDS" })
 public class StandardizeUrlMeta extends BaseStepMeta implements StepMetaInterface {
 
@@ -76,9 +74,8 @@ public class StandardizeUrlMeta extends BaseStepMeta implements StepMetaInterfac
 	/**
 	 * Constants:
 	 */
-
-	private static final String TAG_INPUT = "input_field"; //$NON-NLS-1$
-	private static final String TAG_OUTPUT = "name"; //$NON-NLS-1$
+	private static final String TAG_INPUT_FIELD = "input_field"; //$NON-NLS-1$
+	private static final String TAG_OUTPUT_FIELD = "output_field"; //$NON-NLS-1$
 	private static final String TAG_UNSHORTEN = "unshorten"; //$NON-NLS-1$
 	private static final String TAG_REPLACE_IP_WITH_DOMAIN_NAME = "replace_ip"; //$NON-NLS-1$
 	private static final String TAG_SORT_QUERY_PARAMETERS = "sort_query_parameters"; //$NON-NLS-1$
@@ -91,30 +88,32 @@ public class StandardizeUrlMeta extends BaseStepMeta implements StepMetaInterfac
 	private static final String TAG_REMOVE_FRAGMENT = "remove_fragment"; //$NON-NLS-1$
 	private static final String TAG_REMOVE_SESSION_ID = "remove_session_id"; //$NON-NLS-1$
 
-	/**
-	 * additional options
-	 */
-	/** The url to standardize */
+	/** The urls to standardize */
 	@InjectionDeep
-	private List<StandardizeUrl> standardizeUrls = new ArrayList<>();
+	private List<StandardizeUrl> standardizes = new ArrayList<>();
 
 	@Injection(name = "UNSHORTEN") //$NON-NLS-1$
 	private boolean unshorten;
-
+	@Injection(name = "REPLACE_IP_WITH_DOMAIN_NAME") //$NON-NLS-1$
 	private boolean replaceIPWithDomainName;
+	@Injection(name = "SORT_QUERY_PARAMETERS") //$NON-NLS-1$
 	private boolean sortQueryParameters;
+	@Injection(name = "REMOVE_WWW") //$NON-NLS-1$
 	private boolean removeWWW;
+	@Injection(name = "REMOVE_DEFAULT_PORT") //$NON-NLS-1$
 	private boolean removeDefaultPort;
+	@Injection(name = "REMOVE_DOT_SEGMENTS") //$NON-NLS-1$
 	private boolean removeDotSegments;
+	@Injection(name = "REMOVE_DIRECTORY_INDEX") //$NON-NLS-1$
 	private boolean removeDirectoryIndex;
+	@Injection(name = "REMOVE_FRAGMENT") //$NON-NLS-1$
 	private boolean removeFragment;
+	@Injection(name = "REMOVE_DUPLICATE_SLASHES") //$NON-NLS-1$
 	private boolean removeDuplicateSlashes;
+	@Injection(name = "REMOVE_TRAILING_SLASH") //$NON-NLS-1$
 	private boolean removeTrailingSlash;
+	@Injection(name = "REMOVE_SESSION_ID") //$NON-NLS-1$
 	private boolean removeSessionId;
-
-	/**
-	 * additional options
-	 */
 
 	public StandardizeUrlMeta() {
 		super();
@@ -175,7 +174,7 @@ public class StandardizeUrlMeta extends BaseStepMeta implements StepMetaInterfac
 
 		xml.append(XMLHandler.addTagValue(TAG_UNSHORTEN, this.isUnshorten()));
 		xml.append(XMLHandler.addTagValue(TAG_REPLACE_IP_WITH_DOMAIN_NAME, this.isReplaceIPWithDomainName()));
-		xml.append(XMLHandler.addTagValue(TAG_SORT_QUERY_PARAMETERS, this.isSortQueryParameters()));		
+		xml.append(XMLHandler.addTagValue(TAG_SORT_QUERY_PARAMETERS, this.isSortQueryParameters()));
 		xml.append(XMLHandler.addTagValue(TAG_REMOVE_DEFAULT_PORT, this.isRemoveDefaultPort()));
 		xml.append(XMLHandler.addTagValue(TAG_REMOVE_FRAGMENT, this.isRemoveFragment()));
 		xml.append(XMLHandler.addTagValue(TAG_REMOVE_DUPLICATE_SLASHES, this.isRemoveDuplicateSlashes()));
@@ -188,8 +187,8 @@ public class StandardizeUrlMeta extends BaseStepMeta implements StepMetaInterfac
 		xml.append("<fields>");
 		for (StandardizeUrl standardize : this.getStandardizeUrls()) {
 			xml.append("<field>");
-			xml.append(XMLHandler.addTagValue(TAG_INPUT, standardize.getInputField()));
-			xml.append(XMLHandler.addTagValue(TAG_OUTPUT, standardize.getOutputField()));
+			xml.append(XMLHandler.addTagValue(TAG_INPUT_FIELD, standardize.getInputField()));
+			xml.append(XMLHandler.addTagValue(TAG_OUTPUT_FIELD, standardize.getOutputField()));
 			xml.append("</field>");
 		}
 		xml.append("</fields>");
@@ -217,19 +216,17 @@ public class StandardizeUrlMeta extends BaseStepMeta implements StepMetaInterfac
 			this.setRemoveTrailingSlash(
 					"Y".equalsIgnoreCase(XMLHandler.getTagValue(stepNode, TAG_REMOVE_TRAILING_SLASH)));
 			this.setRemoveDefaultPort("Y".equalsIgnoreCase(XMLHandler.getTagValue(stepNode, TAG_REMOVE_DEFAULT_PORT)));
-			
-			
 
 			Node fields = XMLHandler.getSubNode(stepNode, "fields");
 			int count = XMLHandler.countNodes(fields, "field");
-			standardizeUrls = new ArrayList<>(count);
+			standardizes = new ArrayList<>(count);
 			for (int i = 0; i < count; i++) {
 				Node field = XMLHandler.getSubNodeByNr(fields, "field", i);
 
 				StandardizeUrl standardize = new StandardizeUrl();
-				standardize.setInputField(Const.NVL(XMLHandler.getTagValue(field, TAG_INPUT), ""));
-				standardize.setOutputField(Const.NVL(XMLHandler.getTagValue(field, TAG_OUTPUT), ""));
-				standardizeUrls.add(standardize);
+				standardize.setInputField(XMLHandler.getTagValue(field, TAG_INPUT_FIELD));
+				standardize.setOutputField(XMLHandler.getTagValue(field, TAG_OUTPUT_FIELD));
+				standardizes.add(standardize);
 			}
 
 		} catch (Exception e) {
@@ -261,13 +258,13 @@ public class StandardizeUrlMeta extends BaseStepMeta implements StepMetaInterfac
 					this.isRemoveTrailingSlash());
 			repository.saveStepAttribute(id_transformation, id_step, TAG_REMOVE_DEFAULT_PORT,
 					this.isRemoveDefaultPort());
-			
-			
 
-			for (int i = 0; i < this.standardizeUrls.size(); i++) {
-				StandardizeUrl standardize = standardizeUrls.get(i);
-				repository.saveStepAttribute(id_transformation, id_step, i, TAG_INPUT, standardize.getInputField());
-				repository.saveStepAttribute(id_transformation, id_step, i, TAG_OUTPUT, standardize.getOutputField());
+			for (int i = 0; i < this.standardizes.size(); i++) {
+				StandardizeUrl standardize = standardizes.get(i);
+				repository.saveStepAttribute(id_transformation, id_step, i, TAG_INPUT_FIELD,
+						standardize.getInputField());
+				repository.saveStepAttribute(id_transformation, id_step, i, TAG_OUTPUT_FIELD,
+						standardize.getOutputField());
 			}
 		} catch (Exception e) {
 			throw new KettleException(
@@ -292,15 +289,13 @@ public class StandardizeUrlMeta extends BaseStepMeta implements StepMetaInterfac
 			this.setRemoveTrailingSlash(repository.getStepAttributeBoolean(id_step, TAG_REMOVE_TRAILING_SLASH));
 			this.setRemoveDefaultPort(repository.getStepAttributeBoolean(id_step, TAG_REMOVE_DEFAULT_PORT));
 
-			
-			
-			int count = repository.countNrStepAttributes(id_step, TAG_INPUT);
-			standardizeUrls = new ArrayList<>(count);
+			int count = repository.countNrStepAttributes(id_step, TAG_INPUT_FIELD);
+			standardizes = new ArrayList<>(count);
 			for (int i = 0; i < count; i++) {
 				StandardizeUrl standardize = new StandardizeUrl();
-				standardize.setInputField(repository.getStepAttributeString(id_step, i, TAG_INPUT));
-				standardize.setOutputField(repository.getStepAttributeString(id_step, i, TAG_OUTPUT));
-				standardizeUrls.add(standardize);
+				standardize.setInputField(repository.getStepAttributeString(id_step, i, TAG_INPUT_FIELD));
+				standardize.setOutputField(repository.getStepAttributeString(id_step, i, TAG_OUTPUT_FIELD));
+				standardizes.add(standardize);
 			}
 		} catch (Exception e) {
 
@@ -396,31 +391,31 @@ public class StandardizeUrlMeta extends BaseStepMeta implements StepMetaInterfac
 		if (input.length > 0) {
 			remarks.add(new CheckResult(CheckResultInterface.TYPE_RESULT_OK,
 					BaseMessages.getString(PKG, "StandardizeMeta.CheckResult.ReceivingInfoFromOtherSteps"), stepMeta));
+			
+			// Check only if input fields
+			for (StandardizeUrl standardize : this.getStandardizeUrls()) {
+
+				// See if there are missing input streams
+				ValueMetaInterface vmi = prev.searchValueMeta(standardize.getInputField());
+				if (vmi == null) {
+					String message = BaseMessages.getString(PKG, "StandardizeMeta.CheckResult.MissingInputField",
+							standardize.getInputField());
+					remarks.add(new CheckResult(CheckResultInterface.TYPE_RESULT_ERROR, message, stepMeta));
+				}
+			}
 		} else {
 			remarks.add(new CheckResult(CheckResultInterface.TYPE_RESULT_ERROR,
 					BaseMessages.getString(PKG, "StandardizeMeta.CheckResult.NotReceivingInfoFromOtherSteps"),
 					stepMeta));
 		}
-		
-		for (StandardizeUrl standardize : this.getStandardizeUrls()) {
-
-			// See if there are missing input streams
-			ValueMetaInterface vmi = prev.searchValueMeta(standardize.getInputField());
-			if (vmi == null) {
-				String message = BaseMessages.getString(PKG, "StandardizeUrlMeta.CheckResult.MissingInputField",
-						standardize.getInputField());
-				remarks.add(new CheckResult(CheckResultInterface.TYPE_RESULT_ERROR, message, stepMeta));
-			}
-		}
-
 	}
 
 	public List<StandardizeUrl> getStandardizeUrls() {
-		return this.standardizeUrls;
+		return this.standardizes;
 	}
 
 	public void setStandardizeUrls(final List<StandardizeUrl> standardizes) {
-		this.standardizeUrls = standardizes;
+		this.standardizes = standardizes;
 	}
 
 	public boolean isUnshorten() {
