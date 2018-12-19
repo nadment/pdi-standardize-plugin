@@ -69,7 +69,7 @@ import org.w3c.dom.Node;
 @InjectionSupported(localizationPrefix = "StandardizeUrlMeta.Injection.", groups = { "FIELDS" })
 public class StandardizeUrlMeta extends BaseStepMeta implements StepMetaInterface {
 
-	private static Class<?> PKG = StandardizeUrlMeta.class; // for i18n purposes
+	private static final Class<?> PKG = StandardizeUrlMeta.class; // for i18n purposes
 
 	/**
 	 * Constants:

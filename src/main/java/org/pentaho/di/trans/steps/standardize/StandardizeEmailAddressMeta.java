@@ -59,8 +59,7 @@ import org.w3c.dom.Node;
 @InjectionSupported(localizationPrefix = "StandardizeEmailAddressMeta.Injection.", groups = { "FIELDS" })
 public class StandardizeEmailAddressMeta extends BaseStepMeta implements StepMetaInterface {
 
-	private static Class<?> PKG = StandardizeEmailAddressMeta.class; // for i18n
-																		// purposes
+	private static final Class<?> PKG = StandardizeEmailAddressMeta.class; // for i18n purposes
 
 	/**
 	 * Constants:

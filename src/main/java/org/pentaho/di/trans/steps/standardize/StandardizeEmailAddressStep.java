@@ -43,7 +43,7 @@ import org.pentaho.di.trans.step.StepMetaInterface;
 
 public class StandardizeEmailAddressStep extends BaseStep implements StepInterface {
 
-	private static Class<?> PKG = StandardizeEmailAddressMeta.class;
+	private static final Class<?> PKG = StandardizeEmailAddressMeta.class;
 
 	public StandardizeEmailAddressStep(StepMeta stepMeta, StepDataInterface stepDataInterface, int copyNr,
 			TransMeta transMeta, Trans trans) {

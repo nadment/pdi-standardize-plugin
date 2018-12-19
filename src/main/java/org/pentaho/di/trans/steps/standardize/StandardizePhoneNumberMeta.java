@@ -65,8 +65,7 @@ import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
 @InjectionSupported(localizationPrefix = "StandardizePhoneNumberMeta.Injection.", groups = { "FIELDS" })
 public class StandardizePhoneNumberMeta extends BaseStepMeta implements StepMetaInterface {
 
-	private static Class<?> PKG = StandardizePhoneNumberMeta.class; // for i18n
-																	// purposes
+	private static final Class<?> PKG = StandardizePhoneNumberMeta.class; // for i18n purposes
 	/**
 	 * Constants:
 	 */

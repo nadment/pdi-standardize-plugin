@@ -52,7 +52,7 @@ import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
 @PluginDialog(id = "standardizephonenumber", image = "standardizephonenumber.svg", pluginType = PluginDialog.PluginType.STEP, documentationUrl = "https://github.com/nadment/pdi-standardize-plugin/wiki")
 public class StandardizePhoneNumberDialog extends AbstractStepDialog<StandardizePhoneNumberMeta> {
 
-	private static Class<?> PKG = StandardizePhoneNumberMeta.class; // for i18n
+	private static final Class<?> PKG = StandardizePhoneNumberMeta.class; // for i18n
 																	// purposes
 	private CCombo cmbCountry;
 	private TableView tblFields;

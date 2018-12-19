@@ -47,7 +47,7 @@ import org.pentaho.di.ui.core.widget.TableView;
 @PluginDialog(id = "standardizeemailaddress", image = "standardizeemailaddress.svg", pluginType = PluginDialog.PluginType.STEP, documentationUrl = "https://github.com/nadment/pdi-standardize-plugin/wiki")
 public class StandardizeEmailAddressDialog extends AbstractStepDialog<StandardizeEmailAddressMeta> {
 
-	private static Class<?> PKG = StandardizeEmailAddressMeta.class; // for i18n
+	private static final Class<?> PKG = StandardizeEmailAddressMeta.class; // for i18n
 																		// purposes
 
 	private TableView tblFields;

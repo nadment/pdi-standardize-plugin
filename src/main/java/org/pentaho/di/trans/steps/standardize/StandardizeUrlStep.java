@@ -39,7 +39,7 @@ import org.pentaho.di.trans.step.StepMetaInterface;
 
 public class StandardizeUrlStep extends BaseStep implements StepInterface {
 
-	private static Class<?> PKG = StandardizeUrlMeta.class;
+	private static final Class<?> PKG = StandardizeUrlMeta.class;
 
 	public StandardizeUrlStep(StepMeta stepMeta, StepDataInterface stepDataInterface, int copyNr, TransMeta transMeta,
 			Trans trans) {

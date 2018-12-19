@@ -51,7 +51,7 @@ import org.pentaho.di.ui.core.widget.TableView;
 @PluginDialog(id = "standardizeurl", image = "standardizeurl.svg", pluginType = PluginDialog.PluginType.STEP, documentationUrl = "https://github.com/nadment/pdi-standardize-plugin/wiki")
 public class StandardizeUrlDialog extends AbstractStepDialog<StandardizeUrlMeta> {
 
-	private static Class<?> PKG = StandardizeUrlMeta.class; // for i18n purposes
+	private static final Class<?> PKG = StandardizeUrlMeta.class; // for i18n purposes
 
 	private Button btnUnshorten;
 	private Button btnSortQueryParameters;

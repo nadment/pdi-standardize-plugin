@@ -44,7 +44,7 @@ import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 
 public class StandardizePhoneNumberStep extends BaseStep implements StepInterface {
 
-	private static Class<?> PKG = StandardizePhoneNumberMeta.class;
+	private static final Class<?> PKG = StandardizePhoneNumberMeta.class;
 
 	private PhoneNumberUtil phoneNumberService;
 	private Set<String> supportedRegions;
