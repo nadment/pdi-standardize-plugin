@@ -68,17 +68,13 @@ public class StandardizeUrlDialog extends AbstractStepDialog<StandardizeUrlMeta>
 	private TableView tblFields;
 
 	/**
-	 * Constructor that saves incoming meta object to a local variable, so it
-	 * can conveniently read and write settings from/to it.
+	 * Constructor that saves incoming meta object to a local variable, so it can
+	 * conveniently read and write settings from/to it.
 	 *
-	 * @param parent
-	 *            the SWT shell to open the dialog in
-	 * @param in
-	 *            the meta object holding the step's settings
-	 * @param transMeta
-	 *            transformation description
-	 * @param sName
-	 *            the step name
+	 * @param parent    the SWT shell to open the dialog in
+	 * @param in        the meta object holding the step's settings
+	 * @param transMeta transformation description
+	 * @param sName     the step name
 	 */
 	public StandardizeUrlDialog(Shell parent, Object in, TransMeta transMeta, String sName) {
 		super(parent, in, transMeta, sName);
@@ -314,13 +310,12 @@ public class StandardizeUrlDialog extends AbstractStepDialog<StandardizeUrlMeta>
 		// -----------------------------------------------------------------------------
 		// Search the fields in the background
 		// -----------------------------------------------------------------------------
-		final Runnable runnable = () -> {
-			StepMeta stepMeta = transMeta.findStep(stepname);
-			if (stepMeta != null) {
-				try {
+		new Thread(() -> {
+			try {
+				StepMeta stepMeta = transMeta.findStep(stepname);
+				if (stepMeta != null) {
 					RowMetaInterface row = transMeta.getPrevStepFields(stepMeta);
 					final List<String> inputFields = new ArrayList<>();
-
 					if (row != null) {
 						for (ValueMetaInterface vm : row.getValueMetaList()) {
 							inputFields.add(vm.getName());
@@ -328,15 +323,13 @@ public class StandardizeUrlDialog extends AbstractStepDialog<StandardizeUrlMeta>
 
 						// Sort by name
 						String[] fieldNames = Const.sortStrings(inputFields.toArray(new String[0]));
-
 						columns[0].setComboValues(fieldNames);
 					}
-				} catch (KettleException e) {
-					logError(BaseMessages.getString(PKG, "System.Dialog.GetFieldsFailed.Message"));
 				}
+			} catch (KettleException e) {
+				logError(BaseMessages.getString(PKG, "System.Dialog.GetFieldsFailed.Message"));
 			}
-		};
-		new Thread(runnable).start();
+		}).start();
 
 		return parent;
 	}

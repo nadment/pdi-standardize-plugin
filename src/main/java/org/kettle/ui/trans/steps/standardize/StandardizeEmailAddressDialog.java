@@ -48,22 +48,18 @@ import org.pentaho.di.ui.core.widget.TableView;
 public class StandardizeEmailAddressDialog extends AbstractStepDialog<StandardizeEmailAddressMeta> {
 
 	private static final Class<?> PKG = StandardizeEmailAddressMeta.class; // for i18n
-																		// purposes
+																			// purposes
 
 	private TableView tblFields;
 
 	/**
-	 * Constructor that saves incoming meta object to a local variable, so it
-	 * can conveniently read and write settings from/to it.
+	 * Constructor that saves incoming meta object to a local variable, so it can
+	 * conveniently read and write settings from/to it.
 	 *
-	 * @param parent
-	 *            the SWT shell to open the dialog in
-	 * @param in
-	 *            the meta object holding the step's settings
-	 * @param transMeta
-	 *            transformation description
-	 * @param sName
-	 *            the step name
+	 * @param parent    the SWT shell to open the dialog in
+	 * @param in        the meta object holding the step's settings
+	 * @param transMeta transformation description
+	 * @param sName     the step name
 	 */
 	public StandardizeEmailAddressDialog(Shell parent, Object in, TransMeta transMeta, String sName) {
 		super(parent, in, transMeta, sName);
@@ -152,16 +148,17 @@ public class StandardizeEmailAddressDialog extends AbstractStepDialog<Standardiz
 
 		tblFields = new TableView(transMeta, parent, SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI, columns, 0, lsMod,
 				props);
-		tblFields.setLayoutData(new FormDataBuilder().left().fullWidth().top(lblFields, Const.MARGIN).bottom().result());
+		tblFields
+				.setLayoutData(new FormDataBuilder().left().fullWidth().top(lblFields, Const.MARGIN).bottom().result());
 		tblFields.getTable().addListener(SWT.Resize, new ColumnsResizer(4, 40, 40, 16));
 
 		// -----------------------------------------------------------------------------
 		// Search the fields in the background
 		// -----------------------------------------------------------------------------
-		final Runnable runnable = () -> {
-			StepMeta stepMeta = transMeta.findStep(stepname);
-			if (stepMeta != null) {
-				try {
+		new Thread(() -> {
+			try {
+				StepMeta stepMeta = transMeta.findStep(stepname);
+				if (stepMeta != null) {
 					RowMetaInterface row = transMeta.getPrevStepFields(stepMeta);
 					final List<String> inputFields = new ArrayList<>();
 
@@ -175,12 +172,11 @@ public class StandardizeEmailAddressDialog extends AbstractStepDialog<Standardiz
 
 						columns[0].setComboValues(fieldNames);
 					}
-				} catch (KettleException e) {
-					logError(BaseMessages.getString(PKG, "System.Dialog.GetFieldsFailed.Message"));
 				}
+			} catch (KettleException e) {
+				logError(BaseMessages.getString(PKG, "System.Dialog.GetFieldsFailed.Message"));
 			}
-		};
-		new Thread(runnable).start();
+		}).start();
 
 		return parent;
 	}
