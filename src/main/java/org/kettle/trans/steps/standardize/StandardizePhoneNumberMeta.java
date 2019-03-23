@@ -21,6 +21,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
+import org.kettle.ui.trans.steps.standardize.StandardizePhoneNumberDialog;
 import org.pentaho.di.core.CheckResult;
 import org.pentaho.di.core.CheckResultInterface;
 import org.pentaho.di.core.Const;
@@ -144,6 +145,12 @@ public class StandardizePhoneNumberMeta extends BaseStepMeta implements StepMeta
 		return clone;
 	}
 
+	// For compatibility with 7.x
+	@Override
+	public String getDialogClassName() {
+		return StandardizePhoneNumberDialog.class.getName();
+	}
+	
 	@Override
 	public String getXML() throws KettleValueException {
 

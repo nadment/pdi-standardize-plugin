@@ -19,6 +19,7 @@ package org.kettle.trans.steps.standardize;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.kettle.ui.trans.steps.standardize.StandardizeUrlDialog;
 import org.pentaho.di.core.CheckResult;
 import org.pentaho.di.core.CheckResultInterface;
 import org.pentaho.di.core.annotations.Step;
@@ -166,7 +167,12 @@ public class StandardizeUrlMeta extends BaseStepMeta implements StepMetaInterfac
 
 		return clone;
 	}
-
+	// For compatibility with 7.x
+	@Override
+	public String getDialogClassName() {
+		return StandardizeUrlDialog.class.getName();
+	}
+	
 	@Override
 	public String getXML() throws KettleValueException {
 
